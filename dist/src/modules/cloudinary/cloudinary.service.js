@@ -17,11 +17,25 @@ let CloudinaryService = class CloudinaryService {
     configService;
     constructor(configService) {
         this.configService = configService;
-        cloudinary_1.v2.config({
-            cloud_name: this.configService.get('CLOUDINARY_CLOUD_NAME'),
-            api_key: this.configService.get('CLOUDINARY_API_KEY'),
-            api_secret: this.configService.get('CLOUDINARY_API_SECRET'),
-        });
+        const cloudinaryUrl = this.configService.get('CLOUDINARY_URL');
+        if (cloudinaryUrl) {
+            cloudinary_1.v2.config(cloudinaryUrl);
+        }
+        else {
+            const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
+            const apiKey = this.configService.get('CLOUDINARY_API_KEY');
+            const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
+            if (cloudName && apiKey && apiSecret) {
+                cloudinary_1.v2.config({
+                    cloud_name: cloudName,
+                    api_key: apiKey,
+                    api_secret: apiSecret,
+                });
+            }
+            else {
+                throw new Error('Cloudinary configuration missing: CLOUDINARY_URL or individual credentials required');
+            }
+        }
     }
     async uploadImage(file, folder) {
         return new Promise((resolve, reject) => {

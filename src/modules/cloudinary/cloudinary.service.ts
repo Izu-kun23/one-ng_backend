@@ -6,11 +6,24 @@ import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 @Injectable()
 export class CloudinaryService {
   constructor(private configService: ConfigService) {
-    cloudinary.config({
-      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
-      api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
-      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
-    });
+    const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
+    if (cloudinaryUrl) {
+      cloudinary.config(cloudinaryUrl);
+    } else {
+      // Fallback: try to construct from individual vars if CLOUDINARY_URL not provided
+      const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+      const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+      const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+      if (cloudName && apiKey && apiSecret) {
+        cloudinary.config({
+          cloud_name: cloudName,
+          api_key: apiKey,
+          api_secret: apiSecret,
+        });
+      } else {
+        throw new Error('Cloudinary configuration missing: CLOUDINARY_URL or individual credentials required');
+      }
+    }
   }
 
   async uploadImage(
