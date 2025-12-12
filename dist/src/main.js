@@ -29,16 +29,18 @@ async function bootstrap() {
     }, 'JWT-auth')
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('api', app, document);
+    swagger_1.SwaggerModule.setup('api/docs', app, document, {
+        customSiteTitle: 'Vendor Marketplace API Docs',
+    });
     app.setGlobalPrefix('api');
     app.getHttpAdapter().get('/', (req, res) => {
         res.json({
             message: 'Vendor-to-Vendor Marketplace API',
             version: '1.0',
-            documentation: '/api',
+            documentation: '/api/docs',
             endpoints: {
                 health: '/api',
-                swagger: '/api',
+                swagger: '/api/docs',
                 auth: '/api/auth',
                 users: '/api/users',
                 vendors: '/api/vendors',
@@ -53,7 +55,7 @@ async function bootstrap() {
     const port = process.env.PORT || 3000;
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);
-    console.log(`Swagger documentation: http://localhost:${port}/api`);
+    console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
