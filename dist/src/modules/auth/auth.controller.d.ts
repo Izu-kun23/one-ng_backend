@@ -7,9 +7,9 @@ export declare class AuthController {
     register(registerDto: RegisterDto): Promise<{
         access_token: string;
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
             createdAt: Date;
         };

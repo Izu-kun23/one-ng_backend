@@ -7,9 +7,9 @@ export declare class OrdersController {
     create(createOrderDto: CreateOrderDto, user: any): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -25,16 +25,16 @@ export declare class OrdersController {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
     findAll(role: 'buyer' | 'seller' | 'all', user: any): Promise<({
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -50,16 +50,16 @@ export declare class OrdersController {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     })[]>;
     findOne(id: number, user: any): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -75,16 +75,16 @@ export declare class OrdersController {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
     updateStatus(id: number, updateOrderStatusDto: UpdateOrderStatusDto, user: any): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -100,8 +100,8 @@ export declare class OrdersController {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
 }

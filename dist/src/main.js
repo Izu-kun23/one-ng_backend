@@ -31,6 +31,25 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api', app, document);
     app.setGlobalPrefix('api');
+    app.getHttpAdapter().get('/', (req, res) => {
+        res.json({
+            message: 'Vendor-to-Vendor Marketplace API',
+            version: '1.0',
+            documentation: '/api',
+            endpoints: {
+                health: '/api',
+                swagger: '/api',
+                auth: '/api/auth',
+                users: '/api/users',
+                vendors: '/api/vendors',
+                products: '/api/products',
+                orders: '/api/orders',
+                messages: '/api/messages',
+                upload: '/api/upload',
+                admin: '/api/admin',
+            },
+        });
+    });
     const port = process.env.PORT || 3000;
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);

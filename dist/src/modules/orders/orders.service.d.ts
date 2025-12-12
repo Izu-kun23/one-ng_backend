@@ -7,9 +7,9 @@ export declare class OrdersService {
     create(buyerId: number, createOrderDto: CreateOrderDto): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -25,16 +25,16 @@ export declare class OrdersService {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
     findAll(userId: number, role?: 'buyer' | 'seller' | 'all'): Promise<({
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -50,16 +50,16 @@ export declare class OrdersService {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     })[]>;
     findOne(id: number, userId: number): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -75,16 +75,16 @@ export declare class OrdersService {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
     updateStatus(id: number, userId: number, updateOrderStatusDto: UpdateOrderStatusDto): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -100,8 +100,8 @@ export declare class OrdersService {
         createdAt: Date;
         updatedAt: Date;
         total: number;
-        buyerId: number;
-        status: string;
         sellerId: number;
+        status: string;
+        buyerId: number;
     }>;
 }

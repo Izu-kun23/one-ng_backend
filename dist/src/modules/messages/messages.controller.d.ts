@@ -5,39 +5,39 @@ export declare class MessagesController {
     constructor(messagesService: MessagesService);
     create(createMessageDto: CreateMessageDto, user: any): Promise<{
         sender: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
         receiver: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
     } & {
         id: number;
+        receiverId: number;
         body: string;
         timestamp: Date;
         senderId: number;
-        receiverId: number;
     }>;
     findConversation(userId: number, user: any): Promise<({
         sender: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
         receiver: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
     } & {
         id: number;
+        receiverId: number;
         body: string;
         timestamp: Date;
         senderId: number;
-        receiverId: number;
     })[]>;
     findUserConversations(user: any): Promise<{
         partner: any;

@@ -9,9 +9,9 @@ export declare class AuthService {
     register(registerDto: RegisterDto): Promise<{
         access_token: string;
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
             createdAt: Date;
         };
@@ -26,9 +26,9 @@ export declare class AuthService {
         };
     }>;
     validateUser(userId: number): Promise<{
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
     } | null>;
 }

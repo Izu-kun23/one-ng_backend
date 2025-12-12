@@ -5,39 +5,39 @@ export declare class MessagesService {
     constructor(prisma: PrismaService);
     create(senderId: number, createMessageDto: CreateMessageDto): Promise<{
         sender: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
         receiver: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
     } & {
         id: number;
+        receiverId: number;
         body: string;
         timestamp: Date;
         senderId: number;
-        receiverId: number;
     }>;
     findConversation(userId: number, otherUserId: number): Promise<({
         sender: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
         receiver: {
-            email: string;
             name: string;
+            email: string;
             id: number;
         };
     } & {
         id: number;
+        receiverId: number;
         body: string;
         timestamp: Date;
         senderId: number;
-        receiverId: number;
     })[]>;
     findUserConversations(userId: number): Promise<{
         partner: any;

@@ -9,23 +9,23 @@ export declare class UsersService {
             businessName: string;
             interests: string | null;
         } | null;
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
     findByEmail(email: string): Promise<{
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
     } | null>;
     updateProfile(id: number, updateUserDto: UpdateUserDto): Promise<{
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
         updatedAt: Date;
     }>;

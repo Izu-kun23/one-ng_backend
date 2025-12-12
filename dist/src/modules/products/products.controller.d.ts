@@ -8,8 +8,8 @@ export declare class ProductsController {
     create(createProductDto: CreateProductDto, user: any): Promise<{
         vendor: {
             user: {
-                email: string;
                 name: string;
+                email: string;
                 id: number;
             };
         } & {
@@ -21,11 +21,11 @@ export declare class ProductsController {
             userId: number;
         };
     } & {
+        description: string | null;
+        title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        title: string;
         price: number;
         stock: number;
         vendorId: number;
@@ -34,8 +34,8 @@ export declare class ProductsController {
         data: ({
             vendor: {
                 user: {
-                    email: string;
                     name: string;
+                    email: string;
                     id: number;
                 };
             } & {
@@ -47,11 +47,11 @@ export declare class ProductsController {
                 userId: number;
             };
         } & {
+            description: string | null;
+            title: string;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            title: string;
             price: number;
             stock: number;
             vendorId: number;
@@ -66,9 +66,9 @@ export declare class ProductsController {
     findOne(id: number): Promise<{
         vendor: {
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
         } & {
@@ -80,11 +80,11 @@ export declare class ProductsController {
             userId: number;
         };
     } & {
+        description: string | null;
+        title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        title: string;
         price: number;
         stock: number;
         vendorId: number;
@@ -92,8 +92,8 @@ export declare class ProductsController {
     findByVendor(vendorId: number): Promise<({
         vendor: {
             user: {
-                email: string;
                 name: string;
+                email: string;
                 id: number;
             };
         } & {
@@ -105,11 +105,11 @@ export declare class ProductsController {
             userId: number;
         };
     } & {
+        description: string | null;
+        title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        title: string;
         price: number;
         stock: number;
         vendorId: number;
@@ -117,8 +117,8 @@ export declare class ProductsController {
     update(id: number, updateProductDto: UpdateProductDto, user: any): Promise<{
         vendor: {
             user: {
-                email: string;
                 name: string;
+                email: string;
                 id: number;
             };
         } & {
@@ -130,21 +130,21 @@ export declare class ProductsController {
             userId: number;
         };
     } & {
+        description: string | null;
+        title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        title: string;
         price: number;
         stock: number;
         vendorId: number;
     }>;
     remove(id: number, user: any): Promise<{
+        description: string | null;
+        title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        title: string;
         price: number;
         stock: number;
         vendorId: number;

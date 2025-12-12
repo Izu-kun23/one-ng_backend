@@ -11,9 +11,9 @@ export declare class AdminService {
                 id: number;
                 businessName: string;
             } | null;
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
             role: import("@prisma/client").$Enums.UserRole;
             createdAt: Date;
@@ -81,10 +81,10 @@ export declare class AdminService {
             receivedMessages: number;
         };
     } & {
+        name: string;
         email: string;
         phone: string;
         password: string;
-        name: string;
         id: number;
         role: import("@prisma/client").$Enums.UserRole;
         createdAt: Date;
@@ -112,10 +112,10 @@ export declare class AdminService {
             productId: number | null;
         } | null;
     } & {
+        name: string;
         email: string;
         phone: string;
         password: string;
-        name: string;
         id: number;
         role: import("@prisma/client").$Enums.UserRole;
         createdAt: Date;
@@ -130,9 +130,9 @@ export declare class AdminService {
     getAllVendors(query: AdminQueryDto): Promise<{
         data: ({
             user: {
+                name: string;
                 email: string;
                 phone: string;
-                name: string;
                 id: number;
             };
             _count: {
@@ -173,8 +173,8 @@ export declare class AdminService {
         data: ({
             vendor: {
                 user: {
-                    email: string;
                     name: string;
+                    email: string;
                     id: number;
                 };
             } & {
@@ -198,11 +198,11 @@ export declare class AdminService {
                 productId: number | null;
             }[];
         } & {
+            description: string | null;
+            title: string;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            title: string;
             price: number;
             stock: number;
             vendorId: number;
@@ -221,8 +221,8 @@ export declare class AdminService {
         data: ({
             vendor: {
                 user: {
-                    email: string;
                     name: string;
+                    email: string;
                     id: number;
                 };
             } & {
@@ -238,9 +238,9 @@ export declare class AdminService {
             createdAt: Date;
             updatedAt: Date;
             total: number;
-            buyerId: number;
-            status: string;
             sellerId: number;
+            status: string;
+            buyerId: number;
         })[];
         meta: {
             total: number;

@@ -9,17 +9,17 @@ export declare class UsersController {
             businessName: string;
             interests: string | null;
         } | null;
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
     updateProfile(id: number, updateUserDto: UpdateUserDto, currentUser: any): Promise<{
+        name: string;
         email: string;
         phone: string;
-        name: string;
         id: number;
         updatedAt: Date;
     }>;

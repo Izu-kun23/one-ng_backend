@@ -7,9 +7,9 @@ export declare class VendorsController {
     constructor(vendorsService: VendorsService);
     create(createVendorDto: CreateVendorDto, user: any): Promise<{
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
         };
     } & {
@@ -22,9 +22,9 @@ export declare class VendorsController {
     }>;
     findAll(query: VendorQueryDto): Promise<({
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
         };
         _count: {
@@ -40,20 +40,20 @@ export declare class VendorsController {
     })[]>;
     findOne(id: number): Promise<{
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
         };
         _count: {
             products: number;
         };
         products: {
+            description: string | null;
+            title: string;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            title: string;
             price: number;
             stock: number;
             vendorId: number;
@@ -68,9 +68,9 @@ export declare class VendorsController {
     }>;
     update(id: number, updateVendorDto: UpdateVendorDto, user: any): Promise<{
         user: {
+            name: string;
             email: string;
             phone: string;
-            name: string;
             id: number;
         };
     } & {
