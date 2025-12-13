@@ -16,8 +16,39 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new product (vendor only)' })
-  @ApiResponse({ status: 201, description: 'Product created successfully' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
+  @ApiResponse({
+    status: 201,
+    description: 'Product created successfully',
+    example: {
+      id: 1,
+      title: 'iPhone 15 Pro',
+      description: 'Latest iPhone with advanced features',
+      price: 999.99,
+      stock: 50,
+      vendorId: 1,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      vendor: {
+        id: 1,
+        businessName: 'Tech Store',
+        userId: 1,
+        user: {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor not found',
+    example: {
+      statusCode: 404,
+      message: 'User does not have a vendor profile',
+      error: 'Not Found',
+    },
+  })
   async create(@Body() createProductDto: CreateProductDto, @CurrentUser() user: any) {
     return this.productsService.create(user.id, createProductDto);
   }
@@ -27,15 +58,72 @@ export class ProductsController {
   @ApiQuery({ name: 'search', required: false, description: 'Search term' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
-  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Products retrieved successfully',
+    example: {
+      data: [
+        {
+          id: 1,
+          title: 'iPhone 15 Pro',
+          description: 'Latest iPhone with advanced features',
+          price: 999.99,
+          stock: 50,
+          vendorId: 1,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      meta: {
+        total: 100,
+        page: 1,
+        limit: 10,
+        totalPages: 10,
+      },
+    },
+  })
   async findAll(@Query() query: ProductQueryDto) {
     return this.productsService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product details by ID' })
-  @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product retrieved successfully',
+    example: {
+      id: 1,
+      title: 'iPhone 15 Pro',
+      description: 'Latest iPhone with advanced features',
+      price: 999.99,
+      stock: 50,
+      vendorId: 1,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      vendor: {
+        id: 1,
+        businessName: 'Tech Store',
+        userId: 1,
+      },
+      images: [
+        {
+          id: 1,
+          url: 'https://res.cloudinary.com/example/image/upload/v1/products/1/image1.jpg',
+          publicId: 'products/1/image1',
+          isPrimary: true,
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+    example: {
+      statusCode: 404,
+      message: 'Product not found',
+      error: 'Not Found',
+    },
+  })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
   }

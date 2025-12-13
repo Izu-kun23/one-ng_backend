@@ -42,8 +42,29 @@ export class UploadController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Profile image uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - invalid file' })
+  @ApiResponse({
+    status: 201,
+    description: 'Profile image uploaded successfully',
+    example: {
+      id: 1,
+      url: 'https://res.cloudinary.com/example/image/upload/v1/profile/1/image.jpg',
+      publicId: 'profile/1',
+      entityType: 'USER',
+      entityId: 1,
+      isPrimary: true,
+      userId: 1,
+      createdAt: '2024-01-01T00:00:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid file',
+    example: {
+      statusCode: 400,
+      message: 'Invalid file type or size',
+      error: 'Bad Request',
+    },
+  })
   async uploadProfile(
     @UploadedFile(FileValidationPipe) file: Express.Multer.File,
     @CurrentUser() user: any,
@@ -101,9 +122,50 @@ export class UploadController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Product images uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - invalid files or too many files' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
+  @ApiResponse({
+    status: 201,
+    description: 'Product images uploaded successfully',
+    example: [
+      {
+        id: 1,
+        url: 'https://res.cloudinary.com/example/image/upload/v1/products/1/image1.jpg',
+        publicId: 'products/1/image1',
+        entityType: 'PRODUCT',
+        entityId: 1,
+        isPrimary: true,
+        productId: 1,
+        createdAt: '2024-01-01T00:00:00.000Z',
+      },
+      {
+        id: 2,
+        url: 'https://res.cloudinary.com/example/image/upload/v1/products/1/image2.jpg',
+        publicId: 'products/1/image2',
+        entityType: 'PRODUCT',
+        entityId: 1,
+        isPrimary: false,
+        productId: 1,
+        createdAt: '2024-01-01T00:00:00.000Z',
+      },
+    ],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid files or too many files',
+    example: {
+      statusCode: 400,
+      message: 'At least one image is required',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - not product owner',
+    example: {
+      statusCode: 403,
+      message: 'You can only upload images for your own products',
+      error: 'Forbidden',
+    },
+  })
   async uploadProductImages(
     @Param('productId', ParseIntPipe) productId: number,
     @UploadedFiles() files: Express.Multer.File[],

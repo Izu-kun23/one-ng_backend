@@ -40,15 +40,21 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  // Setup Swagger before global prefix to avoid path conflicts
+  // Setup Swagger BEFORE global prefix to ensure proper path resolution
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Vendor Marketplace API Docs',
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+    customCss: '.swagger-ui .topbar { display: none }',
   });
 
   // Global prefix (applies to all controller routes)
   app.setGlobalPrefix('api');
 
-  // Root route handler (before global prefix applies)
+  // Root route handler
   app.getHttpAdapter().get('/', (req, res) => {
     res.json({
       message: 'Vendor-to-Vendor Marketplace API',
@@ -73,6 +79,8 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`Swagger JSON: http://localhost:${port}/api/docs-json`);
+  console.log(`API base URL: http://localhost:${port}/api`);
 }
 
 bootstrap();

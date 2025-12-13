@@ -14,8 +14,34 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user profile by ID' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile retrieved successfully',
+    example: {
+      id: 1,
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '+1234567890',
+      role: 'USER',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      profileImage: {
+        id: 1,
+        url: 'https://res.cloudinary.com/example/image/upload/v1/profile.jpg',
+        publicId: 'profile/1',
+        isPrimary: true,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    example: {
+      statusCode: 404,
+      message: 'User not found',
+      error: 'Not Found',
+    },
+  })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
