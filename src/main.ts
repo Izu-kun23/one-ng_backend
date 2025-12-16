@@ -75,12 +75,16 @@ async function bootstrap() {
     });
   });
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
-  console.log(`Swagger JSON: http://localhost:${port}/api/docs-json`);
-  console.log(`API base URL: http://localhost:${port}/api`);
+  const port = Number(process.env.PORT) || 3000;
+  const host = process.env.HOST || '0.0.0.0';
+
+  await app.listen(port, host);
+
+  // Logs are informational; Railway will provide the public URL.
+  console.log(`Application is running on: http://${host}:${port}`);
+  console.log(`Swagger documentation: http://${host}:${port}/api/docs`);
+  console.log(`Swagger JSON: http://${host}:${port}/api/docs-json`);
+  console.log(`API base URL: http://${host}:${port}/api`);
 }
 
 bootstrap();
