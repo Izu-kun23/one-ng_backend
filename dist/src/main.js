@@ -15,6 +15,7 @@ async function bootstrap() {
         origin: true,
         credentials: true,
     });
+    app.setGlobalPrefix('api');
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Vendor-to-Vendor Marketplace API')
         .setDescription('Backend API for Vendor-to-Vendor Marketplace Application')
@@ -38,7 +39,6 @@ async function bootstrap() {
         },
         customCss: '.swagger-ui .topbar { display: none }',
     });
-    app.setGlobalPrefix('api');
     app.getHttpAdapter().get('/', (req, res) => {
         res.json({
             message: 'Vendor-to-Vendor Marketplace API',

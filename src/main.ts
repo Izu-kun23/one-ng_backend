@@ -21,6 +21,10 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Global prefix (applies to all controller routes)
+  // Important: set this BEFORE generating Swagger docs so Swagger uses /api/* paths.
+  app.setGlobalPrefix('api');
+
   // Swagger/OpenAPI configuration
   const config = new DocumentBuilder()
     .setTitle('Vendor-to-Vendor Marketplace API')
@@ -40,7 +44,6 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  // Setup Swagger BEFORE global prefix to ensure proper path resolution
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Vendor Marketplace API Docs',
     swaggerOptions: {
@@ -50,9 +53,6 @@ async function bootstrap() {
     },
     customCss: '.swagger-ui .topbar { display: none }',
   });
-
-  // Global prefix (applies to all controller routes)
-  app.setGlobalPrefix('api');
 
   // Root route handler
   app.getHttpAdapter().get('/', (req, res) => {
