@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
+const auth_response_dto_1 = require("./dto/auth-response.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -34,8 +35,30 @@ exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('register'),
     (0, swagger_1.ApiOperation)({ summary: 'Register a new user' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'User successfully registered' }),
-    (0, swagger_1.ApiResponse)({ status: 409, description: 'User already exists' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'User successfully registered',
+        type: auth_response_dto_1.AuthResponseDto,
+        example: {
+            access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTcwNDA2NDAwMCwiZXhwIjoxNzA0NjY4ODAwfQ.example_signature',
+            user: {
+                id: 1,
+                email: 'john@example.com',
+                name: 'John Doe',
+                phone: '+1234567890',
+                createdAt: '2024-01-01T00:00:00.000Z',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 409,
+        description: 'User already exists',
+        example: {
+            statusCode: 409,
+            message: 'User with this email or phone already exists',
+            error: 'Conflict',
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
@@ -45,8 +68,29 @@ __decorate([
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Login user' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User successfully logged in' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'User successfully logged in',
+        type: auth_response_dto_1.AuthResponseDto,
+        example: {
+            access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiam9obkBleGFtcGxlLmNvbSIsImlhdCI6MTcwNDA2NDAwMCwiZXhwIjoxNzA0NjY4ODAwfQ.example_signature',
+            user: {
+                id: 1,
+                email: 'john@example.com',
+                name: 'John Doe',
+                phone: '+1234567890',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Invalid credentials',
+        example: {
+            statusCode: 401,
+            message: 'Invalid credentials',
+            error: 'Unauthorized',
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),

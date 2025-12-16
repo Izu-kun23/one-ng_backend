@@ -31,6 +31,12 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api/docs', app, document, {
         customSiteTitle: 'Vendor Marketplace API Docs',
+        swaggerOptions: {
+            persistAuthorization: true,
+            tagsSorter: 'alpha',
+            operationsSorter: 'alpha',
+        },
+        customCss: '.swagger-ui .topbar { display: none }',
     });
     app.setGlobalPrefix('api');
     app.getHttpAdapter().get('/', (req, res) => {
@@ -56,6 +62,8 @@ async function bootstrap() {
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);
     console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
+    console.log(`Swagger JSON: http://localhost:${port}/api/docs-json`);
+    console.log(`API base URL: http://localhost:${port}/api`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

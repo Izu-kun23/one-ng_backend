@@ -38,8 +38,34 @@ exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get user profile by ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User profile retrieved successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'User profile retrieved successfully',
+        example: {
+            id: 1,
+            name: 'John Doe',
+            email: 'john@example.com',
+            phone: '+1234567890',
+            role: 'USER',
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+            profileImage: {
+                id: 1,
+                url: 'https://res.cloudinary.com/example/image/upload/v1/profile.jpg',
+                publicId: 'profile/1',
+                isPrimary: true,
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'User not found',
+        example: {
+            statusCode: 404,
+            message: 'User not found',
+            error: 'Not Found',
+        },
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
