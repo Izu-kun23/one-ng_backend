@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
 import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 
 @Injectable()
 export class CloudinaryService {
+  private readonly logger = new Logger(CloudinaryService.name);
+  private configured = false;
+
   constructor(private configService: ConfigService) {
     const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
     if (cloudinaryUrl) {
       cloudinary.config(cloudinaryUrl);
+      this.configured = true;
     } else {
       // Fallback: try to construct from individual vars if CLOUDINARY_URL not provided
       const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
@@ -20,9 +24,22 @@ export class CloudinaryService {
           api_key: apiKey,
           api_secret: apiSecret,
         });
+        this.configured = true;
       } else {
-        throw new Error('Cloudinary configuration missing: CLOUDINARY_URL or individual credentials required');
+        // Don't crash the whole API (and Swagger) if uploads aren't configured yet.
+        // We'll throw only when an upload/delete operation is actually called.
+        this.logger.warn(
+          'Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET to enable uploads.',
+        );
       }
+    }
+  }
+
+  private assertConfigured() {
+    if (!this.configured) {
+      throw new ServiceUnavailableException(
+        'Cloudinary is not configured on this server. Please set CLOUDINARY_URL (or individual credentials).',
+      );
     }
   }
 
@@ -30,6 +47,7 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder?: string,
   ): Promise<{ url: string; publicId: string }> {
+    this.assertConfigured();
     return new Promise((resolve, reject) => {
       const uploadOptions: any = {
         resource_type: 'image',
@@ -54,6 +72,7 @@ export class CloudinaryService {
   }
 
   async deleteImage(publicId: string): Promise<void> {
+    this.assertConfigured();
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(publicId, (error, result) => {
         if (error) {
@@ -66,6 +85,7 @@ export class CloudinaryService {
   }
 
   getImageUrl(publicId: string, transformations?: any): string {
+    this.assertConfigured();
     return cloudinary.url(publicId, {
       secure: true,
       ...transformations,
@@ -76,6 +96,7 @@ export class CloudinaryService {
     files: Express.Multer.File[],
     folder?: string,
   ): Promise<{ url: string; publicId: string }[]> {
+    this.assertConfigured();
     const uploadPromises = files.map((file) => this.uploadImage(file, folder));
     return Promise.all(uploadPromises);
   }
