@@ -35,21 +35,23 @@ export class AuthService {
     }
 
     // Validate business info for vendor registration
-    if (!businessName || !interests || !businessPhone || !businessLogo) {
+    if (!businessName || !interests || !businessPhone) {
       throw new BadRequestException(
-        'All business info (name, interests, phone, logo) is required for vendor registration',
+        'Business info (name, interests, phone) is required for vendor registration',
       );
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Upload business logo to Cloudinary
+    // Upload business logo to Cloudinary (optional)
     let logoUploadResult;
-    try {
-      logoUploadResult = await this.cloudinaryService.uploadImage(businessLogo, 'vendor-logos');
-    } catch (error) {
-      throw new BadRequestException('Failed to upload business logo');
+    if (businessLogo) {
+      try {
+        logoUploadResult = await this.cloudinaryService.uploadImage(businessLogo, 'vendor-logos');
+      } catch (error) {
+        throw new BadRequestException('Failed to upload business logo');
+      }
     }
 
     // Create user and vendor profile, then attach logo once vendor id exists
@@ -87,20 +89,23 @@ export class AuthService {
         throw new InternalServerErrorException('Failed to create vendor profile');
       }
 
-      await tx.image.create({
-        data: {
-          url: logoUploadResult.url,
-          publicId: logoUploadResult.publicId,
-          entityType: 'vendor',
-          entityId: userRecord.vendor.id,
-          isPrimary: true,
-          vendor: {
-            connect: {
-              id: userRecord.vendor.id,
+      // Create logo image record only if logo was uploaded
+      if (logoUploadResult) {
+        await tx.image.create({
+          data: {
+            url: logoUploadResult.url,
+            publicId: logoUploadResult.publicId,
+            entityType: 'vendor',
+            entityId: userRecord.vendor.id,
+            isPrimary: true,
+            vendor: {
+              connect: {
+                id: userRecord.vendor.id,
+              },
             },
           },
-        },
-      });
+        });
+      }
 
       return userRecord;
     });

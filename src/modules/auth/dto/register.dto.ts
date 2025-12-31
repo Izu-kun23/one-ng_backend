@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'John Doe' })
@@ -38,7 +38,8 @@ export class RegisterDto {
   @IsNotEmpty()
   businessPhone: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file' })
-  businessLogo: any;
+  @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file', required: false })
+  @IsOptional()
+  businessLogo?: any;
 }
 
