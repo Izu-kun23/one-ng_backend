@@ -1,6 +1,13 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
@@ -10,10 +17,11 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, phone, password, name } = registerDto;
+    const { email, phone, password, name, businessName, interests, businessPhone, businessLogo } = registerDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
@@ -26,25 +34,107 @@ export class AuthService {
       throw new ConflictException('User with this email or phone already exists');
     }
 
+    // Validate business info for vendor registration
+    if (!businessName || !interests || !businessPhone || !businessLogo) {
+      throw new BadRequestException(
+        'All business info (name, interests, phone, logo) is required for vendor registration',
+      );
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        phone,
-        password: hashedPassword,
-        name,
-      },
+    // Upload business logo to Cloudinary
+    let logoUploadResult;
+    try {
+      logoUploadResult = await this.cloudinaryService.uploadImage(businessLogo, 'vendor-logos');
+    } catch (error) {
+      throw new BadRequestException('Failed to upload business logo');
+    }
+
+    // Create user and vendor profile, then attach logo once vendor id exists
+    const createdUser = await this.prisma.$transaction(async (tx) => {
+      const userRecord = await tx.user.create({
+        data: {
+          email,
+          phone,
+          password: hashedPassword,
+          name,
+          vendor: {
+            create: {
+              businessName,
+              interests,
+            },
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          createdAt: true,
+          vendor: {
+            select: {
+              id: true,
+              businessName: true,
+              interests: true,
+            },
+          },
+        },
+      });
+
+      if (!userRecord.vendor) {
+        throw new InternalServerErrorException('Failed to create vendor profile');
+      }
+
+      await tx.image.create({
+        data: {
+          url: logoUploadResult.url,
+          publicId: logoUploadResult.publicId,
+          entityType: 'vendor',
+          entityId: userRecord.vendor.id,
+          isPrimary: true,
+          vendor: {
+            connect: {
+              id: userRecord.vendor.id,
+            },
+          },
+        },
+      });
+
+      return userRecord;
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: createdUser.id },
       select: {
         id: true,
         email: true,
         name: true,
         phone: true,
         createdAt: true,
+        vendor: {
+          select: {
+            id: true,
+            businessName: true,
+            interests: true,
+            logo: {
+              select: {
+                id: true,
+                url: true,
+                publicId: true,
+                entityType: true,
+                isPrimary: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    if (!user) {
+      throw new InternalServerErrorException('Failed to retrieve created user');
+    }
 
     // Generate JWT token
     const payload = { sub: user.id, email: user.email };

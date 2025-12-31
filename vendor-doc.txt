@@ -1,0 +1,43 @@
+# Vendor Dashboard Documentation
+
+This document describes the intended behavior and features of the Vendor Dashboard in the backend system. The Vendor Dashboard is designed to provide vendors with the tools and insights necessary to manage their business activities on the platform efficiently.
+
+---
+
+## Overview
+The Vendor Dashboard serves as the central hub for vendors, allowing them to manage their profile, products, and orders, as well as monitor their business performance. It is accessible only to authenticated users with vendor privileges.
+
+## Key Features and Behaviors
+
+### 1. Vendor Profile Management
+- **View & Edit Profile:** Vendors can view and update their business information, including business name, contact details, and logo.
+- **Profile Image/Logo Upload:** Vendors can upload or update their business logo, which is displayed on their profile and product listings.
+
+### 2. Product Management
+- **Create Product:** Vendors can add new products, providing details such as title, description, price, and images.
+- **Edit Product:** Vendors can update existing product information and images.
+- **Delete Product:** Vendors can remove products that are no longer available or relevant.
+- **View Product List:** Vendors can see a list of all their products, with options to search and filter.
+
+### 3. Order Management
+- **View Orders:** Vendors can view all orders placed for their products, including order details and customer information.
+- **Update Order Status:** Vendors can update the status of orders (e.g., confirm, ship, deliver) to keep customers informed.
+- **Order Filtering:** Vendors can filter orders by status or date to streamline order management.
+
+### 4. Messaging
+- **Customer Communication:** Vendors can send and receive messages with customers, facilitating direct communication for order updates or inquiries.
+
+### 5. Analytics & Insights
+- **Business Metrics:** Vendors can access analytics such as total sales, number of products, and order statistics to monitor business performance.
+
+## Security and Access Control
+- Only authenticated users with vendor roles can access the Vendor Dashboard.
+- All actions are protected by role-based guards to ensure vendors can only manage their own data.
+
+## Intended User Experience
+- The dashboard should be intuitive and responsive, providing vendors with clear navigation and actionable insights.
+- Real-time updates and notifications are recommended for new orders and messages.
+
+---
+
+For technical implementation details, refer to the `src/modules/vendors/`, `src/modules/products/`, and `src/modules/orders/` directories in the codebase. These modules contain the controllers, services, and DTOs that power the Vendor Dashboard features.

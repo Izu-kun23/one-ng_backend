@@ -1,0 +1,68 @@
+# Project Functionality Overview
+
+This document provides a comprehensive analysis of the backend codebase, summarizing the main features and functionalities implemented across all modules.
+
+---
+
+## 1. User Authentication & Authorization
+- **User Registration & Login:** Users can register and log in using secure authentication mechanisms (JWT-based).
+- **Role-Based Access Control:** The system supports different user roles (e.g., admin, vendor, regular user) with access restrictions enforced via guards and decorators.
+- **Current User Context:** Decorators are used to inject the current user context into controllers for personalized actions.
+
+## 2. Admin Functionality
+- **User Management:** Admins can view, update, delete, and ban/unban users.
+- **Vendor Management:** Admins can view all vendors and approve or reject vendor applications.
+- **Product Management:** Admins can view and delete any product on the platform.
+- **Order Management:** Admins can view all orders.
+- **Analytics:** Admins have access to system-wide analytics, including user, vendor, product, order, and revenue statistics.
+
+## 3. Vendor Functionality
+- **Vendor Registration & Profile:** Users can register as vendors and manage their vendor profiles.
+- **Product Management:** Vendors can create, update, and manage their own products, including uploading images.
+- **Order Management:** Vendors can view and manage orders related to their products.
+
+## 4. Product Functionality
+- **Product Listing:** Products can be created, updated, listed, and deleted. Each product can have multiple images and is associated with a vendor.
+- **Product Search & Filtering:** Products can be queried with various filters for efficient searching.
+
+## 5. Order Functionality
+- **Order Creation:** Users can place orders for products.
+- **Order Status Updates:** Orders can be updated (e.g., confirmed, shipped, delivered) by authorized users (vendors/admins).
+- **Order Listing:** Orders can be listed and filtered by users, vendors, and admins.
+
+## 6. Messaging Functionality
+- **User Messaging:** Users can send and receive messages within the platform.
+- **Message Listing:** Messages can be listed and filtered for each user.
+
+## 7. File Uploads
+- **Image Uploads:** The system supports uploading images for user profiles, vendor logos, and product images, leveraging a cloud storage service (e.g., Cloudinary).
+- **File Validation:** Uploaded files are validated for type and size.
+
+## 8. Common Utilities
+- **Guards & Interceptors:** Custom guards and interceptors enforce security, logging, and request/response transformations.
+- **Pipes:** Validation pipes ensure data integrity for incoming requests.
+
+## 9. Database & ORM
+- **Prisma ORM:** The backend uses Prisma for database access, migrations, and schema management.
+- **Migrations:** Database schema changes are managed via migration files.
+
+## 10. Testing
+- **E2E Testing:** End-to-end tests are provided to ensure the reliability of core features.
+
+---
+
+## Directory Structure Highlights
+- `src/modules/admin/` — Admin features
+- `src/modules/auth/` — Authentication and authorization
+- `src/modules/vendors/` — Vendor management
+- `src/modules/products/` — Product management
+- `src/modules/orders/` — Order management
+- `src/modules/messages/` — Messaging
+- `src/modules/upload/` — File uploads
+- `src/common/` — Shared utilities (decorators, guards, pipes, etc.)
+- `src/prisma/` — Database service integration
+- `prisma/` — Prisma schema and migrations
+
+---
+
+This backend is designed for scalability, security, and maintainability, following best practices with NestJS, Prisma, and modular architecture. For more details, refer to the source code in each module.

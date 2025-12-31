@@ -7,9 +7,17 @@ export class CreateVendorDto {
   @IsNotEmpty()
   businessName: string;
 
-  @ApiProperty({ example: 'Electronics, Clothing, Food', required: false })
+  @ApiProperty({ example: 'Electronics, Clothing, Food' })
   @IsString()
-  @IsOptional()
-  interests?: string;
+  @IsNotEmpty()
+  interests: string;
+
+  @ApiProperty({ example: '+1234567890' })
+  @IsString()
+  @IsNotEmpty()
+  businessPhone: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file' })
+  businessLogo: any;
 }
 
