@@ -180,6 +180,19 @@ export class AuthService {
     };
   }
 
+  async logout(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    return { message: 'Logged out successfully' };
+  }
+
   async validateUser(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
