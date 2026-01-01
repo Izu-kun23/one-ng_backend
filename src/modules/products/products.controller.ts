@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { UploadProductImageDto } from './dto/upload-product-image.dto';
+import { UploadMultipleProductImagesDto } from './dto/upload-multiple-product-images.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -159,6 +162,71 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: any) {
     return this.productsService.remove(id, user.id);
+  }
+
+  // Image management endpoints
+  @Post(':id/images')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a single image to a product (owner only)' })
+  @ApiResponse({ status: 201, description: 'Image uploaded successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async uploadImage(
+    @Param('id', ParseIntPipe) productId: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadDto: UploadProductImageDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.productsService.uploadImage(productId, user.id, file, uploadDto.isPrimary);
+  }
+
+  @Post(':id/images/multiple')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FilesInterceptor('images'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload multiple images to a product (owner only)' })
+  @ApiResponse({ status: 201, description: 'Images uploaded successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async uploadMultipleImages(
+    @Param('id', ParseIntPipe) productId: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() uploadDto: UploadMultipleProductImagesDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.productsService.uploadMultipleImages(productId, user.id, files, uploadDto.primaryIndex);
+  }
+
+  @Patch('images/:imageId/primary')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set an image as primary (owner only)' })
+  @ApiResponse({ status: 200, description: 'Primary image updated successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
+  @ApiResponse({ status: 404, description: 'Image not found' })
+  async setPrimaryImage(
+    @Param('imageId', ParseIntPipe) imageId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.productsService.setPrimaryImage(imageId, user.id);
+  }
+
+  @Delete('images/:imageId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a product image (owner only)' })
+  @ApiResponse({ status: 200, description: 'Image deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
+  @ApiResponse({ status: 404, description: 'Image not found' })
+  async removeImage(
+    @Param('imageId', ParseIntPipe) imageId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.productsService.removeImage(imageId, user.id);
   }
 }
 

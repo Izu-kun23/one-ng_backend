@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async create(userId: number, createProductDto: CreateProductDto) {
     // Get user's vendor
@@ -192,6 +196,184 @@ export class ProductsService {
     return this.prisma.product.delete({
       where: { id },
     });
+  }
+
+  async uploadImage(productId: number, userId: number, file: Express.Multer.File, isPrimary = false) {
+    // Verify product exists and user owns it
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: { vendor: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (product.vendor.userId !== userId) {
+      throw new ForbiddenException('You can only add images to your own products');
+    }
+
+    // Upload image to Cloudinary
+    const uploadResult = await this.cloudinaryService.uploadImage(file, `products/${productId}`);
+
+    // If setting as primary, unset existing primary images
+    if (isPrimary) {
+      await this.prisma.image.updateMany({
+        where: {
+          productId,
+          isPrimary: true,
+        },
+        data: {
+          isPrimary: false,
+        },
+      });
+    }
+
+    // Create image record
+    const image = await this.prisma.image.create({
+      data: {
+        url: uploadResult.url,
+        publicId: uploadResult.publicId,
+        entityType: 'product',
+        entityId: productId,
+        isPrimary,
+        productId,
+      },
+    });
+
+    return image;
+  }
+
+  async uploadMultipleImages(productId: number, userId: number, files: Express.Multer.File[], primaryIndex?: number) {
+    // Verify product exists and user owns it
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: { vendor: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (product.vendor.userId !== userId) {
+      throw new ForbiddenException('You can only add images to your own products');
+    }
+
+    const uploadedImages: any[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isPrimary = primaryIndex === i;
+
+      // Upload image to Cloudinary
+      const uploadResult = await this.cloudinaryService.uploadImage(file, `products/${productId}`);
+
+      // If setting as primary, unset existing primary images
+      if (isPrimary) {
+        await this.prisma.image.updateMany({
+          where: {
+            productId,
+            isPrimary: true,
+          },
+          data: {
+            isPrimary: false,
+          },
+        });
+      }
+
+      // Create image record
+      const image = await this.prisma.image.create({
+        data: {
+          url: uploadResult.url,
+          publicId: uploadResult.publicId,
+          entityType: 'product',
+          entityId: productId,
+          isPrimary,
+          productId,
+        },
+      });
+
+      uploadedImages.push(image);
+    }
+
+    return uploadedImages;
+  }
+
+  async removeImage(imageId: number, userId: number) {
+    // Get image with product and vendor info
+    const image = await this.prisma.image.findUnique({
+      where: { id: imageId },
+      include: {
+        product: {
+          include: {
+            vendor: true,
+          },
+        },
+      },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    // Verify user owns the product
+    if (!image.product || image.product.vendor.userId !== userId) {
+      throw new ForbiddenException('You can only remove images from your own products');
+    }
+
+    // Delete from Cloudinary
+    await this.cloudinaryService.deleteImage(image.publicId);
+
+    // Delete from database
+    await this.prisma.image.delete({
+      where: { id: imageId },
+    });
+
+    return { message: 'Image deleted successfully' };
+  }
+
+  async setPrimaryImage(imageId: number, userId: number) {
+    // Get image with product and vendor info
+    const image = await this.prisma.image.findUnique({
+      where: { id: imageId },
+      include: {
+        product: {
+          include: {
+            vendor: true,
+          },
+        },
+      },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    // Verify user owns the product
+    if (!image.product || image.product.vendor.userId !== userId) {
+      throw new ForbiddenException('You can only manage images for your own products');
+    }
+
+    // Unset existing primary images for this product
+    await this.prisma.image.updateMany({
+      where: {
+        productId: image.productId,
+        isPrimary: true,
+      },
+      data: {
+        isPrimary: false,
+      },
+    });
+
+    // Set this image as primary
+    const updatedImage = await this.prisma.image.update({
+      where: { id: imageId },
+      data: {
+        isPrimary: true,
+      },
+    });
+
+    return updatedImage;
   }
 }
 
