@@ -264,6 +264,8 @@ export class ProductsService {
   }
 
   async uploadImage(productId: number, userId: number, file: Express.Multer.File, isPrimary = false) {
+    console.log('Upload request:', { productId, userId, isPrimary, file: file ? file.originalname : 'no file' });
+    
     try {
       // Verify product exists and user owns it
       const product = await this.prisma.product.findUnique({
@@ -272,24 +274,30 @@ export class ProductsService {
       });
 
       if (!product) {
+        console.log('Product not found:', productId);
         throw new NotFoundException('Product not found');
       }
 
       if (product.vendor.userId !== userId) {
+        console.log('Permission denied: product userId', product.vendor.userId, 'request userId', userId);
         throw new ForbiddenException('You can only add images to your own products');
       }
+
+      console.log('Product verified, uploading to Cloudinary...');
 
       // Upload image to Cloudinary
       let uploadResult;
       try {
         uploadResult = await this.cloudinaryService.uploadImage(file, `products/${productId}`);
+        console.log('Cloudinary upload successful:', uploadResult);
       } catch (error) {
         console.error('Cloudinary upload error:', error);
-        throw new BadRequestException('Failed to upload image to cloud storage');
+        throw new BadRequestException('Failed to upload image to cloud storage: ' + error.message);
       }
 
       // If setting as primary, unset existing primary images
       if (isPrimary) {
+        console.log('Setting as primary, unsetting existing...');
         await this.prisma.image.updateMany({
           where: {
             productId,
@@ -300,6 +308,8 @@ export class ProductsService {
           },
         });
       }
+
+      console.log('Creating image record...');
 
       // Create image record
       const image = await this.prisma.image.create({
@@ -313,6 +323,7 @@ export class ProductsService {
         },
       });
 
+      console.log('Image record created:', image);
       return image;
     } catch (error) {
       console.error('Upload image error:', error);
