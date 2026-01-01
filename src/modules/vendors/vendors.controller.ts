@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, ParseIntPipe, Req, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -17,16 +17,27 @@ export class VendorsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create vendor profile' })
-  @ApiResponse({
-    status: 201,
-    description: 'Vendor profile created successfully',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User already has a vendor profile',
-  })
+  @ApiResponse({ status: 201, description: 'Vendor profile created successfully' })
+  @ApiResponse({ status: 409, description: 'User already has a vendor profile' })
   async create(@Body() createVendorDto: CreateVendorDto, @CurrentUser() user: any) {
     return this.vendorsService.create(user.id, createVendorDto);
+  }
+
+  /** Get the logged-in vendor's profile */
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get logged-in vendor's profile" })
+  @ApiResponse({ status: 200, description: 'Vendor profile retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Vendor profile not found' })
+  async getMyProfile(@Req() req: any) {
+    const userId = req.user?.id; // Extract user ID from JWT
+    if (!userId) throw new NotFoundException('User not found');
+
+    const vendor = await this.vendorsService.getVendorByUserId(userId);
+    if (!vendor) throw new NotFoundException('Vendor profile not found');
+
+    return vendor;
   }
 
   /** List all vendors */
@@ -60,16 +71,5 @@ export class VendorsController {
     @CurrentUser() user: any,
   ) {
     return this.vendorsService.update(id, user.id, updateVendorDto);
-  }
-
-  /** Get the logged-in vendor's profile */
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get logged-in vendor profile' })
-  @ApiResponse({ status: 200, description: 'Vendor profile retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Vendor profile not found' })
-  async getMyProfile(@CurrentUser() user: any) {
-    return this.vendorsService.findByUserId(user.id);
   }
 }
