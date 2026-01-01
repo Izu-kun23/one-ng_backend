@@ -7,7 +7,7 @@ export class UploadProductImageDto {
     format: 'binary',
     description: 'Product image file',
   })
-  image: any;
+  file: any;
 
   @ApiProperty({
     description: 'Whether this image should be set as primary',
