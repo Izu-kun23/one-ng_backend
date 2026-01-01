@@ -178,7 +178,7 @@ export class ProductsController {
   @Post(':id/images')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a single image to a product (owner only)' })
   @ApiResponse({ status: 201, description: 'Image uploaded successfully' })

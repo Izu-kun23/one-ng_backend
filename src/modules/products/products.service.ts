@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -264,49 +264,60 @@ export class ProductsService {
   }
 
   async uploadImage(productId: number, userId: number, file: Express.Multer.File, isPrimary = false) {
-    // Verify product exists and user owns it
-    const product = await this.prisma.product.findUnique({
-      where: { id: productId },
-      include: { vendor: true },
-    });
+    try {
+      // Verify product exists and user owns it
+      const product = await this.prisma.product.findUnique({
+        where: { id: productId },
+        include: { vendor: true },
+      });
 
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
+      if (!product) {
+        throw new NotFoundException('Product not found');
+      }
 
-    if (product.vendor.userId !== userId) {
-      throw new ForbiddenException('You can only add images to your own products');
-    }
+      if (product.vendor.userId !== userId) {
+        throw new ForbiddenException('You can only add images to your own products');
+      }
 
-    // Upload image to Cloudinary
-    const uploadResult = await this.cloudinaryService.uploadImage(file, `products/${productId}`);
+      // Upload image to Cloudinary
+      let uploadResult;
+      try {
+        uploadResult = await this.cloudinaryService.uploadImage(file, `products/${productId}`);
+      } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        throw new BadRequestException('Failed to upload image to cloud storage');
+      }
 
-    // If setting as primary, unset existing primary images
-    if (isPrimary) {
-      await this.prisma.image.updateMany({
-        where: {
-          productId,
-          isPrimary: true,
-        },
+      // If setting as primary, unset existing primary images
+      if (isPrimary) {
+        await this.prisma.image.updateMany({
+          where: {
+            productId,
+            isPrimary: true,
+          },
+          data: {
+            isPrimary: false,
+          },
+        });
+      }
+
+      // Create image record
+      const image = await this.prisma.image.create({
         data: {
-          isPrimary: false,
+          url: uploadResult.url,
+          publicId: uploadResult.publicId,
+          entityType: 'product',
+          entityId: productId,
+          isPrimary,
+          productId,
         },
       });
+
+      return image;
+    } catch (error) {
+      console.error('Upload image error:', error);
+      throw error;
     }
-
-    // Create image record
-    const image = await this.prisma.image.create({
-      data: {
-        url: uploadResult.url,
-        publicId: uploadResult.publicId,
-        entityType: 'product',
-        entityId: productId,
-        isPrimary,
-        productId,
-      },
-    });
-
-    return image;
   }
 
   async uploadMultipleImages(productId: number, userId: number, files: Express.Multer.File[], primaryIndex?: number) {
