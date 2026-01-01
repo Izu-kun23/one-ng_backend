@@ -8,6 +8,9 @@ import { VendorQueryDto } from './dto/vendor-query.dto';
 export class VendorsService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Create a vendor profile for a user
+   */
   async create(userId: number, createVendorDto: CreateVendorDto) {
     // Check if user already has a vendor profile
     const existingVendor = await this.prisma.vendor.findUnique({
@@ -36,6 +39,9 @@ export class VendorsService {
     });
   }
 
+  /**
+   * Get all vendors optionally filtered by interests
+   */
   async findAll(query: VendorQueryDto) {
     const where: any = {};
 
@@ -66,6 +72,9 @@ export class VendorsService {
     });
   }
 
+  /**
+   * Get a vendor by vendor ID
+   */
   async findOne(id: number) {
     const vendor = await this.prisma.vendor.findUnique({
       where: { id },
@@ -99,6 +108,9 @@ export class VendorsService {
     return vendor;
   }
 
+  /**
+   * Update a vendor profile (only by owner)
+   */
   async update(id: number, userId: number, updateVendorDto: UpdateVendorDto) {
     const vendor = await this.prisma.vendor.findUnique({
       where: { id },
@@ -108,7 +120,6 @@ export class VendorsService {
       throw new NotFoundException('Vendor not found');
     }
 
-    // Ensure user can only update their own vendor profile
     if (vendor.userId !== userId) {
       throw new ForbiddenException('Unauthorized to update this vendor profile');
     }
@@ -128,5 +139,40 @@ export class VendorsService {
       },
     });
   }
-}
 
+  /**
+   * Get a vendor profile by the logged-in user's ID
+   */
+  async findByUserId(userId: number) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        products: {
+          take: 10,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        _count: {
+          select: {
+            products: true,
+          },
+        },
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor profile not found');
+    }
+
+    return vendor;
+  }
+}
