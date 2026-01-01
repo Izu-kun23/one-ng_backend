@@ -75,6 +75,16 @@ export class ProductsController {
           vendorId: 1,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
+          images: [
+            {
+              id: 1,
+              url: 'https://res.cloudinary.com/example/image/upload/v1/products/1/image1.jpg',
+              publicId: 'products/1/image1',
+              isPrimary: true,
+              entityType: 'product',
+              entityId: 1,
+            },
+          ],
         },
       ],
       meta: {
