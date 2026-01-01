@@ -33,10 +33,10 @@ export class RegisterDto {
   @IsNotEmpty()
   interests: string;
 
-  @ApiProperty({ example: '+1234567890' })
-  @IsString()
-  @IsNotEmpty()
-  businessPhone: string;
+  // @ApiProperty({ example: '+1234567890' })
+  // @IsString()
+  // @IsNotEmpty()
+  // businessPhone: string;
 
   // @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file', required: false })
   // @IsOptional()

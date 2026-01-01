@@ -19,7 +19,7 @@ export class AuthService {
   ) {}
 
   // =========================
-  // REGISTER (NO FILE UPLOADS)
+  // REGISTER
   // =========================
   async register(registerDto: RegisterDto) {
     const {
@@ -29,7 +29,6 @@ export class AuthService {
       name,
       businessName,
       interests,
-      businessPhone,
     } = registerDto;
 
     // 1️⃣ Check if user already exists
@@ -43,43 +42,38 @@ export class AuthService {
       throw new ConflictException('User with this email or phone already exists');
     }
 
-    // 2️⃣ Validate required vendor fields
-    if (!businessName || !interests || !businessPhone) {
+    // 2️⃣ Validate vendor fields
+    if (!businessName || !interests) {
       throw new BadRequestException(
-        'Business info (name, interests, phone) is required for vendor registration',
+        'Business name and interests are required for vendor registration',
       );
     }
 
     // 3️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4️⃣ Create user + vendor atomically
-    const createdUser = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email,
-          phone,
-          password: hashedPassword,
-          name,
-          vendor: {
-            create: {
-              businessName,
-              interests,
-              businessPhone,
-            },
+    // 4️⃣ Create user + vendor
+    const createdUser = await this.prisma.user.create({
+      data: {
+        email,
+        phone,
+        password: hashedPassword,
+        name,
+        vendor: {
+          create: {
+            businessName,
+            interests,
           },
         },
-        include: {
-          vendor: true,
-        },
-      });
-
-      if (!user.vendor) {
-        throw new InternalServerErrorException('Vendor creation failed');
-      }
-
-      return user;
+      },
+      include: {
+        vendor: true,
+      },
     });
+
+    if (!createdUser.vendor) {
+      throw new InternalServerErrorException('Vendor creation failed');
+    }
 
     // 5️⃣ Fetch clean response
     const user = await this.prisma.user.findUnique({
@@ -95,7 +89,6 @@ export class AuthService {
             id: true,
             businessName: true,
             interests: true,
-            businessPhone: true,
             logo: {
               select: {
                 id: true,
