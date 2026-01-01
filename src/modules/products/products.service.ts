@@ -39,6 +39,19 @@ export class ProductsService {
             },
           },
         },
+        images: {
+          select: {
+            id: true,
+            url: true,
+            publicId: true,
+            isPrimary: true,
+            entityType: true,
+            entityId: true,
+          },
+          orderBy: {
+            isPrimary: 'desc',
+          },
+        },
       },
     });
   }
@@ -76,6 +89,19 @@ export class ProductsService {
               },
             },
           },
+          images: {
+            select: {
+              id: true,
+              url: true,
+              publicId: true,
+              isPrimary: true,
+              entityType: true,
+              entityId: true,
+            },
+            orderBy: {
+              isPrimary: 'desc',
+            },
+          },
         },
       }),
       this.prisma.product.count({ where }),
@@ -108,6 +134,19 @@ export class ProductsService {
             },
           },
         },
+        images: {
+          select: {
+            id: true,
+            url: true,
+            publicId: true,
+            isPrimary: true,
+            entityType: true,
+            entityId: true,
+          },
+          orderBy: {
+            isPrimary: 'desc',
+          },
+        },
       },
     });
 
@@ -134,6 +173,19 @@ export class ProductsService {
                 email: true,
               },
             },
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            url: true,
+            publicId: true,
+            isPrimary: true,
+            entityType: true,
+            entityId: true,
+          },
+          orderBy: {
+            isPrimary: 'desc',
           },
         },
       },
@@ -170,6 +222,19 @@ export class ProductsService {
                 email: true,
               },
             },
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            url: true,
+            publicId: true,
+            isPrimary: true,
+            entityType: true,
+            entityId: true,
+          },
+          orderBy: {
+            isPrimary: 'desc',
           },
         },
       },
