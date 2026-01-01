@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
@@ -15,15 +14,25 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-    private cloudinaryService: CloudinaryService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
   ) {}
 
+  // =========================
+  // REGISTER (NO FILE UPLOADS)
+  // =========================
   async register(registerDto: RegisterDto) {
-    const { email, phone, password, name, businessName, interests, businessPhone, businessLogo } = registerDto;
+    const {
+      email,
+      phone,
+      password,
+      name,
+      businessName,
+      interests,
+      businessPhone,
+    } = registerDto;
 
-    // Check if user already exists
+    // 1️⃣ Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
         OR: [{ email }, { phone }],
@@ -34,29 +43,19 @@ export class AuthService {
       throw new ConflictException('User with this email or phone already exists');
     }
 
-    // Validate business info for vendor registration
+    // 2️⃣ Validate required vendor fields
     if (!businessName || !interests || !businessPhone) {
       throw new BadRequestException(
         'Business info (name, interests, phone) is required for vendor registration',
       );
     }
 
-    // Hash password
+    // 3️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Upload business logo to Cloudinary (optional)
-    let logoUploadResult;
-    if (businessLogo) {
-      try {
-        logoUploadResult = await this.cloudinaryService.uploadImage(businessLogo, 'vendor-logos');
-      } catch (error) {
-        throw new BadRequestException('Failed to upload business logo');
-      }
-    }
-
-    // Create user and vendor profile, then attach logo once vendor id exists
+    // 4️⃣ Create user + vendor atomically
     const createdUser = await this.prisma.$transaction(async (tx) => {
-      const userRecord = await tx.user.create({
+      const user = await tx.user.create({
         data: {
           email,
           phone,
@@ -66,50 +65,23 @@ export class AuthService {
             create: {
               businessName,
               interests,
+              businessPhone,
             },
           },
         },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          phone: true,
-          createdAt: true,
-          vendor: {
-            select: {
-              id: true,
-              businessName: true,
-              interests: true,
-            },
-          },
+        include: {
+          vendor: true,
         },
       });
 
-      if (!userRecord.vendor) {
-        throw new InternalServerErrorException('Failed to create vendor profile');
+      if (!user.vendor) {
+        throw new InternalServerErrorException('Vendor creation failed');
       }
 
-      // Create logo image record only if logo was uploaded
-      if (logoUploadResult) {
-        await tx.image.create({
-          data: {
-            url: logoUploadResult.url,
-            publicId: logoUploadResult.publicId,
-            entityType: 'vendor',
-            entityId: userRecord.vendor.id,
-            isPrimary: true,
-            vendor: {
-              connect: {
-                id: userRecord.vendor.id,
-              },
-            },
-          },
-        });
-      }
-
-      return userRecord;
+      return user;
     });
 
+    // 5️⃣ Fetch clean response
     const user = await this.prisma.user.findUnique({
       where: { id: createdUser.id },
       select: {
@@ -123,12 +95,12 @@ export class AuthService {
             id: true,
             businessName: true,
             interests: true,
+            businessPhone: true,
             logo: {
               select: {
                 id: true,
                 url: true,
                 publicId: true,
-                entityType: true,
                 isPrimary: true,
               },
             },
@@ -141,7 +113,7 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to retrieve created user');
     }
 
-    // Generate JWT token
+    // 6️⃣ Generate JWT
     const payload = { sub: user.id, email: user.email };
     const access_token = this.jwtService.sign(payload);
 
@@ -151,10 +123,12 @@ export class AuthService {
     };
   }
 
+  // =========================
+  // LOGIN
+  // =========================
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Find user
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -163,14 +137,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
     const payload = { sub: user.id, email: user.email };
     const access_token = this.jwtService.sign(payload);
 
@@ -185,6 +157,9 @@ export class AuthService {
     };
   }
 
+  // =========================
+  // LOGOUT
+  // =========================
   async logout(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -198,8 +173,11 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
+  // =========================
+  // VALIDATE USER
+  // =========================
   async validateUser(userId: number) {
-    const user = await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -208,8 +186,5 @@ export class AuthService {
         phone: true,
       },
     });
-
-    return user;
   }
 }
-

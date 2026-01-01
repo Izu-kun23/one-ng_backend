@@ -38,8 +38,8 @@ export class RegisterDto {
   @IsNotEmpty()
   businessPhone: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file', required: false })
-  @IsOptional()
-  businessLogo?: any;
+  // @ApiProperty({ type: 'string', format: 'binary', description: 'Business logo image file', required: false })
+  // @IsOptional()
+  // businessLogo?: any;
 }
 
