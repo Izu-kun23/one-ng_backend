@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min, IsInt, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min, IsInt, MinLength, IsArray } from 'class-validator';
 
 export class UpdateProductDto {
   @ApiProperty({ example: 'iPhone 15 Pro', required: false })
@@ -24,5 +24,33 @@ export class UpdateProductDto {
   @Min(0)
   @IsOptional()
   stock?: number;
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    description: 'New product images to add (optional)',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  newImages?: any[];
+
+  @ApiProperty({
+    description: 'Index of the new primary image (0-based, optional)',
+    required: false,
+  })
+  @IsOptional()
+  newPrimaryImageIndex?: number;
+
+  @ApiProperty({
+    description: 'Array of image IDs to remove (optional)',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  removeImageIds?: number[];
 }
 

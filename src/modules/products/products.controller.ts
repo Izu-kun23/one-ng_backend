@@ -18,7 +18,9 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new product (vendor only)' })
+  @UseInterceptors(FilesInterceptor('images', 10))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Create a new product with optional images (vendor only)' })
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
@@ -41,6 +43,7 @@ export class ProductsController {
           email: 'john@example.com',
         },
       },
+      images: [],
     },
   })
   @ApiResponse({
@@ -52,8 +55,12 @@ export class ProductsController {
       error: 'Not Found',
     },
   })
-  async create(@Body() createProductDto: CreateProductDto, @CurrentUser() user: any) {
-    return this.productsService.create(user.id, createProductDto);
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @CurrentUser() user: any,
+  ) {
+    return this.productsService.create(user.id, createProductDto, files);
   }
 
   @Get()
@@ -151,16 +158,19 @@ export class ProductsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update product (owner only)' })
+  @UseInterceptors(FilesInterceptor('newImages', 10))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Update product with optional image management (owner only)' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: any,
   ) {
-    return this.productsService.update(id, user.id, updateProductDto);
+    return this.productsService.update(id, user.id, updateProductDto, files);
   }
 
   @Delete(':id')
