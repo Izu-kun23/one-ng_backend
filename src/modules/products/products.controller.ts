@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, UploadedFiles, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
@@ -13,6 +13,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
+  private readonly logger = new Logger(ProductsController.name);
+
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
@@ -60,7 +62,23 @@ export class ProductsController {
     @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: any,
   ) {
-    return this.productsService.create(user.id, createProductDto, files);
+    try {
+      this.logger.log('Creating product with DTO:', createProductDto);
+      this.logger.log('Files received:', files?.length || 0);
+      
+      if (files) {
+        files.forEach((file, index) => {
+          this.logger.log(`File ${index}: ${file.originalname}, size: ${file.size}`);
+        });
+      }
+
+      const result = await this.productsService.create(user.id, createProductDto, files);
+      this.logger.log('Product created successfully:', result?.id);
+      return result;
+    } catch (error) {
+      this.logger.error('Product creation failed:', error.response?.data || error.message);
+      throw error;
+    }
   }
 
   @Get()
