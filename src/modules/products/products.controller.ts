@@ -20,9 +20,7 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FilesInterceptor('images', 10))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Create a new product with optional images (vendor only)' })
+  @ApiOperation({ summary: 'Create a new product (vendor only)' })
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
@@ -57,31 +55,10 @@ export class ProductsController {
       error: 'Not Found',
     },
   })
-  async create(
-    @UploadedFiles() files: Express.Multer.File[],
-    @CurrentUser() user: any,
-    @Body() body: any,
-  ) {
+  async create(@Body() createProductDto: CreateProductDto, @CurrentUser() user: any) {
     try {
-      // Extract product data from FormData body
-      const createProductDto = {
-        title: body.title,
-        description: body.description,
-        price: parseFloat(body.price),
-        stock: parseInt(body.stock),
-        primaryImageIndex: body.primaryImageIndex ? parseInt(body.primaryImageIndex) : undefined,
-      };
-
       this.logger.log('Creating product with DTO:', createProductDto);
-      this.logger.log('Files received:', files?.length || 0);
-      
-      if (files) {
-        files.forEach((file, index) => {
-          this.logger.log(`File ${index}: ${file.originalname}, size: ${file.size}`);
-        });
-      }
-
-      const result = await this.productsService.create(user.id, createProductDto, files);
+      const result = await this.productsService.create(user.id, createProductDto);
       this.logger.log('Product created successfully:', result?.id);
       return result;
     } catch (error) {
@@ -185,33 +162,18 @@ export class ProductsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FilesInterceptor('newImages', 10))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Update product with optional image management (owner only)' })
+  @ApiOperation({ summary: 'Update product (owner only)' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - not product owner' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFiles() files: Express.Multer.File[],
+    @Body() updateProductDto: UpdateProductDto,
     @CurrentUser() user: any,
-    @Body() body: any,
   ) {
     try {
-      // Extract update data from FormData body
-      const updateProductDto = {
-        title: body.title,
-        description: body.description,
-        price: body.price ? parseFloat(body.price) : undefined,
-        stock: body.stock ? parseInt(body.stock) : undefined,
-        newPrimaryImageIndex: body.newPrimaryImageIndex ? parseInt(body.newPrimaryImageIndex) : undefined,
-        removeImageIds: body.removeImageIds ? JSON.parse(body.removeImageIds) : undefined,
-      };
-
       this.logger.log('Updating product with DTO:', updateProductDto);
-      this.logger.log('Files received:', files?.length || 0);
-
-      const result = await this.productsService.update(id, user.id, updateProductDto, files);
+      const result = await this.productsService.update(id, user.id, updateProductDto);
       return result;
     } catch (error) {
       this.logger.error('Product update failed:', error.response?.data || error.message);

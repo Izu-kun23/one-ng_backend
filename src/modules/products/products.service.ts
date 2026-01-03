@@ -12,7 +12,7 @@ export class ProductsService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(userId: number, createProductDto: CreateProductDto, files?: Express.Multer.File[]) {
+  async create(userId: number, createProductDto: CreateProductDto) {
     // Get user's vendor
     const vendor = await this.prisma.vendor.findUnique({
       where: { userId },
@@ -22,8 +22,7 @@ export class ProductsService {
       throw new NotFoundException('User does not have a vendor profile');
     }
 
-    // Create product first
-    const product = await this.prisma.product.create({
+    return this.prisma.product.create({
       data: {
         title: createProductDto.title,
         description: createProductDto.description,
@@ -31,42 +30,6 @@ export class ProductsService {
         stock: createProductDto.stock,
         vendorId: vendor.id,
       },
-      include: {
-        vendor: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
-        images: {
-          select: {
-            id: true,
-            url: true,
-            publicId: true,
-            isPrimary: true,
-            entityType: true,
-            entityId: true,
-          },
-          orderBy: {
-            isPrimary: 'desc',
-          },
-        },
-      },
-    });
-
-    // If images are provided, upload them
-    if (files && files.length > 0) {
-      await this.uploadMultipleImages(product.id, userId, files, createProductDto.primaryImageIndex);
-    }
-
-    // Return product with images
-    return this.prisma.product.findUnique({
-      where: { id: product.id },
       include: {
         vendor: {
           include: {
@@ -232,7 +195,7 @@ export class ProductsService {
     });
   }
 
-  async update(id: number, userId: number, updateProductDto: UpdateProductDto, files?: Express.Multer.File[]) {
+  async update(id: number, userId: number, updateProductDto: UpdateProductDto) {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
@@ -249,58 +212,9 @@ export class ProductsService {
       throw new ForbiddenException('You can only update your own products');
     }
 
-    // Remove specified images first
-    if (updateProductDto.removeImageIds && updateProductDto.removeImageIds.length > 0) {
-      for (const imageId of updateProductDto.removeImageIds) {
-        await this.removeImage(imageId, userId);
-      }
-    }
-
-    // Update product data
-    const updatedProduct = await this.prisma.product.update({
+    return this.prisma.product.update({
       where: { id },
-      data: {
-        title: updateProductDto.title,
-        description: updateProductDto.description,
-        price: updateProductDto.price,
-        stock: updateProductDto.stock,
-      },
-      include: {
-        vendor: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
-        images: {
-          select: {
-            id: true,
-            url: true,
-            publicId: true,
-            isPrimary: true,
-            entityType: true,
-            entityId: true,
-          },
-          orderBy: {
-            isPrimary: 'desc',
-          },
-        },
-      },
-    });
-
-    // Upload new images if provided
-    if (files && files.length > 0) {
-      await this.uploadMultipleImages(id, userId, files, updateProductDto.newPrimaryImageIndex);
-    }
-
-    // Return updated product with all images
-    return this.prisma.product.findUnique({
-      where: { id },
+      data: updateProductDto,
       include: {
         vendor: {
           include: {

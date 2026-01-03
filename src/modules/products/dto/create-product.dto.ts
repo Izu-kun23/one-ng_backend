@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsInt, MinLength, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsInt, MinLength } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'iPhone 15 Pro' })
@@ -22,25 +22,5 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   stock: number;
-
-  @ApiProperty({
-    type: 'array',
-    items: {
-      type: 'string',
-      format: 'binary',
-    },
-    description: 'Product images (optional)',
-    required: false,
-  })
-  @IsOptional()
-  @IsArray()
-  images?: any[];
-
-  @ApiProperty({
-    description: 'Index of the primary image (0-based, optional)',
-    required: false,
-  })
-  @IsOptional()
-  primaryImageIndex?: number;
 }
 
