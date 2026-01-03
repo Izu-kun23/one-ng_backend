@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,24 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-}
-
 model User {
-  id           Int        @id @default(autoincrement())
-  name         String
-  email        String     @unique
-  phone        String     @unique
-  password     String
-  role         UserRole   @default(USER)
-  vendor       Vendor?
-  profileImage Image?     @relation("UserProfileImage")
-  sentMessages Message[]  @relation("SentMessages")
+  id               Int       @id @default(autoincrement())
+  name             String
+  email            String    @unique
+  phone            String    @unique
+  password         String
+  role             UserRole  @default(USER)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  profileImage     Image?    @relation("UserProfileImage")
   receivedMessages Message[] @relation("ReceivedMessages")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  sentMessages     Message[] @relation("SentMessages")
+  vendor           Vendor?
 }
 
 model Vendor {
@@ -35,12 +27,12 @@ model Vendor {
   businessName String
   interests    String?
   userId       Int       @unique
-  logo         Image?    @relation("VendorLogo")
-  products     Product[]
-  orders       Order[]   @relation("VendorOrders")
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  logo         Image?    @relation("VendorLogo")
+  orders       Order[]   @relation("VendorOrders")
+  products     Product[]
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {
@@ -50,10 +42,10 @@ model Product {
   price       Float
   stock       Int      @default(0)
   vendorId    Int
-  images      Image[]  @relation("ProductImages")
-  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ProductImages")
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }
 
 model Order {
@@ -62,9 +54,9 @@ model Order {
   buyerId   Int
   sellerId  Int
   status    String   @default("pending")
-  vendor    Vendor   @relation("VendorOrders", fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  vendor    Vendor   @relation("VendorOrders", fields: [sellerId], references: [id], onDelete: Cascade)
 }
 
 model Message {
@@ -73,22 +65,27 @@ model Message {
   receiverId Int
   body       String
   timestamp  DateTime @default(now())
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 model Image {
   id         Int      @id @default(autoincrement())
   url        String
-  publicId  String
+  publicId   String
   entityType String
   entityId   Int
   isPrimary  Boolean  @default(false)
   userId     Int?     @unique
   vendorId   Int?     @unique
   productId  Int?
+  createdAt  DateTime @default(now())
+  product    Product? @relation("ProductImages", fields: [productId], references: [id], onDelete: Cascade)
   user       User?    @relation("UserProfileImage", fields: [userId], references: [id], onDelete: Cascade)
   vendor     Vendor?  @relation("VendorLogo", fields: [vendorId], references: [id], onDelete: Cascade)
-  product    Product? @relation("ProductImages", fields: [productId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
