@@ -11,7 +11,6 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
-import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -27,7 +26,6 @@ import { UploadModule } from './modules/upload/upload.module';
     MessagesModule,
     AdminModule,
     CloudinaryModule,
-    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
