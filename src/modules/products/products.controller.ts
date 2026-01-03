@@ -58,11 +58,20 @@ export class ProductsController {
     },
   })
   async create(
-    @Body() createProductDto: CreateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: any,
+    @Body() body: any,
   ) {
     try {
+      // Extract product data from FormData body
+      const createProductDto = {
+        title: body.title,
+        description: body.description,
+        price: parseFloat(body.price),
+        stock: parseInt(body.stock),
+        primaryImageIndex: body.primaryImageIndex ? parseInt(body.primaryImageIndex) : undefined,
+      };
+
       this.logger.log('Creating product with DTO:', createProductDto);
       this.logger.log('Files received:', files?.length || 0);
       
@@ -184,11 +193,30 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateProductDto: UpdateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
     @CurrentUser() user: any,
+    @Body() body: any,
   ) {
-    return this.productsService.update(id, user.id, updateProductDto, files);
+    try {
+      // Extract update data from FormData body
+      const updateProductDto = {
+        title: body.title,
+        description: body.description,
+        price: body.price ? parseFloat(body.price) : undefined,
+        stock: body.stock ? parseInt(body.stock) : undefined,
+        newPrimaryImageIndex: body.newPrimaryImageIndex ? parseInt(body.newPrimaryImageIndex) : undefined,
+        removeImageIds: body.removeImageIds ? JSON.parse(body.removeImageIds) : undefined,
+      };
+
+      this.logger.log('Updating product with DTO:', updateProductDto);
+      this.logger.log('Files received:', files?.length || 0);
+
+      const result = await this.productsService.update(id, user.id, updateProductDto, files);
+      return result;
+    } catch (error) {
+      this.logger.error('Product update failed:', error.response?.data || error.message);
+      throw error;
+    }
   }
 
   @Delete(':id')
