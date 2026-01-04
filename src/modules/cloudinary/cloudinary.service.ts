@@ -9,54 +9,44 @@ export class CloudinaryService {
   private configured = false;
 
   constructor(private configService: ConfigService) {
-    // Try individual credentials first (more reliable)
-    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
-    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
-    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+    // Prioritize CLOUDINARY_URL from .env (most reliable)
+    const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
     
-    // Log what we're reading (for debugging, without exposing secrets)
-    this.logger.log(`Reading Cloudinary config - Cloud: ${cloudName ? 'SET' : 'MISSING'}, API Key: ${apiKey ? `${apiKey.substring(0, 4)}...` : 'MISSING'}, Secret: ${apiSecret ? 'SET' : 'MISSING'}`);
-    
-    if (cloudName && apiKey && apiSecret) {
+    if (cloudinaryUrl) {
       try {
-        // Trim whitespace and validate
-        const trimmedCloudName = cloudName.trim();
-        const trimmedApiKey = apiKey.trim();
-        const trimmedApiSecret = apiSecret.trim();
-        
-        // Validate lengths (API key is usually numeric, secret is longer)
-        if (trimmedApiKey.length < 10) {
-          this.logger.warn(`API Key seems too short: ${trimmedApiKey.length} chars`);
-        }
-        if (trimmedApiSecret.length < 20) {
-          this.logger.warn(`API Secret seems too short: ${trimmedApiSecret.length} chars`);
-        }
-        
-        cloudinary.config({
-          cloud_name: trimmedCloudName,
-          api_key: trimmedApiKey,
-          api_secret: trimmedApiSecret,
-        });
+        const trimmedUrl = cloudinaryUrl.trim();
+        this.logger.log('Configuring Cloudinary using CLOUDINARY_URL from environment...');
+        cloudinary.config(trimmedUrl);
         this.configured = true;
-        this.logger.log(`✅ Cloudinary configured successfully - Cloud: ${trimmedCloudName}, API Key: ${trimmedApiKey.substring(0, 4)}...`);
+        this.logger.log('✅ Cloudinary configured successfully using CLOUDINARY_URL');
       } catch (error) {
-        this.logger.error(`❌ Failed to configure Cloudinary: ${error.message}`);
-        this.logger.error(`Error details: ${JSON.stringify(error)}`);
+        this.logger.error(`❌ Failed to configure Cloudinary with CLOUDINARY_URL: ${error.message}`);
       }
     }
     
-    // Fallback to CLOUDINARY_URL if individual vars not provided
+    // Fallback to individual credentials if CLOUDINARY_URL not provided
     if (!this.configured) {
-      const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
-      if (cloudinaryUrl) {
+      const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+      const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+      const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+      
+      this.logger.log(`CLOUDINARY_URL not found, trying individual credentials - Cloud: ${cloudName ? 'SET' : 'MISSING'}, API Key: ${apiKey ? `${apiKey.substring(0, 4)}...` : 'MISSING'}, Secret: ${apiSecret ? 'SET' : 'MISSING'}`);
+      
+      if (cloudName && apiKey && apiSecret) {
         try {
-          const trimmedUrl = cloudinaryUrl.trim();
-          this.logger.log('Attempting to configure Cloudinary using CLOUDINARY_URL...');
-          cloudinary.config(trimmedUrl);
+          const trimmedCloudName = cloudName.trim();
+          const trimmedApiKey = apiKey.trim();
+          const trimmedApiSecret = apiSecret.trim();
+          
+          cloudinary.config({
+            cloud_name: trimmedCloudName,
+            api_key: trimmedApiKey,
+            api_secret: trimmedApiSecret,
+          });
           this.configured = true;
-          this.logger.log('✅ Cloudinary configured using CLOUDINARY_URL');
+          this.logger.log(`✅ Cloudinary configured successfully using individual credentials - Cloud: ${trimmedCloudName}, API Key: ${trimmedApiKey.substring(0, 4)}...`);
         } catch (error) {
-          this.logger.error(`❌ Failed to configure Cloudinary with CLOUDINARY_URL: ${error.message}`);
+          this.logger.error(`❌ Failed to configure Cloudinary with individual credentials: ${error.message}`);
         }
       } else {
         this.logger.warn(
