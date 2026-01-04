@@ -215,6 +215,7 @@ export class ProductsController {
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'file', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
       { name: 'files', maxCount: 1 },
     ]),
   )
@@ -226,12 +227,16 @@ export class ProductsController {
   async uploadImage(
     @Param('id', ParseIntPipe) productId: number,
     @UploadedFiles()
-    uploaded: { file?: Express.Multer.File[]; files?: Express.Multer.File[] },
+    uploaded: { file?: Express.Multer.File[]; image?: Express.Multer.File[]; files?: Express.Multer.File[] },
     @Body() uploadDto: UploadProductImageDto,
     @CurrentUser() user: any,
   ) {
-    const file = uploaded?.file?.[0] ?? uploaded?.files?.[0];
-    if (!file) throw new BadRequestException('File is required (use multipart field "file")');
+    const file = uploaded?.file?.[0] ?? uploaded?.image?.[0] ?? uploaded?.files?.[0];
+    if (!file) {
+      throw new BadRequestException(
+        'File is required (use multipart field "file" or "image")',
+      );
+    }
     return this.productsService.uploadImage(productId, user.id, file, uploadDto.isPrimary);
   }
 
@@ -242,6 +247,7 @@ export class ProductsController {
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'files', maxCount: 10 },
+      { name: 'image', maxCount: 10 },
       { name: 'images', maxCount: 10 },
     ]),
   )
@@ -253,12 +259,16 @@ export class ProductsController {
   async uploadMultipleImages(
     @Param('id', ParseIntPipe) productId: number,
     @UploadedFiles()
-    uploaded: { files?: Express.Multer.File[]; images?: Express.Multer.File[] },
+    uploaded: { files?: Express.Multer.File[]; image?: Express.Multer.File[]; images?: Express.Multer.File[] },
     @Body() uploadDto: UploadMultipleProductImagesDto,
     @CurrentUser() user: any,
   ) {
-    const files = uploaded?.files ?? uploaded?.images ?? [];
-    if (!files.length) throw new BadRequestException('At least one file is required (use multipart field "files")');
+    const files = uploaded?.files ?? uploaded?.images ?? uploaded?.image ?? [];
+    if (!files.length) {
+      throw new BadRequestException(
+        'At least one file is required (use multipart field "files", "images", or "image")',
+      );
+    }
     return this.productsService.uploadMultipleImages(productId, user.id, files, uploadDto.primaryIndex);
   }
 

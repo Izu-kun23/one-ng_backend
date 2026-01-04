@@ -194,6 +194,7 @@ export declare class ProductsController {
     }>;
     uploadImage(productId: number, uploaded: {
         file?: Express.Multer.File[];
+        image?: Express.Multer.File[];
         files?: Express.Multer.File[];
     }, uploadDto: UploadProductImageDto, user: any): Promise<{
         id: number;
@@ -209,6 +210,7 @@ export declare class ProductsController {
     }>;
     uploadMultipleImages(productId: number, uploaded: {
         files?: Express.Multer.File[];
+        image?: Express.Multer.File[];
         images?: Express.Multer.File[];
     }, uploadDto: UploadMultipleProductImagesDto, user: any): Promise<any[]>;
     setPrimaryImage(imageId: number, user: any): Promise<{
