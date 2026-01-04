@@ -11,20 +11,32 @@ export class CloudinaryService {
   constructor(private configService: ConfigService) {
     const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
     if (cloudinaryUrl) {
-      cloudinary.config(cloudinaryUrl);
-      this.configured = true;
-    } else {
-      // Fallback: try to construct from individual vars if CLOUDINARY_URL not provided
+      try {
+        cloudinary.config(cloudinaryUrl);
+        this.configured = true;
+        this.logger.log('Cloudinary configured using CLOUDINARY_URL');
+      } catch (error) {
+        this.logger.error('Failed to configure Cloudinary with CLOUDINARY_URL:', error.message);
+      }
+    }
+    
+    // Fallback: try to construct from individual vars if CLOUDINARY_URL not provided or failed
+    if (!this.configured) {
       const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
       const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
       const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
       if (cloudName && apiKey && apiSecret) {
-        cloudinary.config({
-          cloud_name: cloudName,
-          api_key: apiKey,
-          api_secret: apiSecret,
-        });
-        this.configured = true;
+        try {
+          cloudinary.config({
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+          });
+          this.configured = true;
+          this.logger.log('Cloudinary configured using individual credentials');
+        } catch (error) {
+          this.logger.error('Failed to configure Cloudinary with individual credentials:', error.message);
+        }
       } else {
         // Don't crash the whole API (and Swagger) if uploads aren't configured yet.
         // We'll throw only when an upload/delete operation is actually called.

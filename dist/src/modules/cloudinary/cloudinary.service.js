@@ -22,20 +22,32 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
         this.configService = configService;
         const cloudinaryUrl = this.configService.get('CLOUDINARY_URL');
         if (cloudinaryUrl) {
-            cloudinary_1.v2.config(cloudinaryUrl);
-            this.configured = true;
+            try {
+                cloudinary_1.v2.config(cloudinaryUrl);
+                this.configured = true;
+                this.logger.log('Cloudinary configured using CLOUDINARY_URL');
+            }
+            catch (error) {
+                this.logger.error('Failed to configure Cloudinary with CLOUDINARY_URL:', error.message);
+            }
         }
-        else {
+        if (!this.configured) {
             const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
             const apiKey = this.configService.get('CLOUDINARY_API_KEY');
             const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
             if (cloudName && apiKey && apiSecret) {
-                cloudinary_1.v2.config({
-                    cloud_name: cloudName,
-                    api_key: apiKey,
-                    api_secret: apiSecret,
-                });
-                this.configured = true;
+                try {
+                    cloudinary_1.v2.config({
+                        cloud_name: cloudName,
+                        api_key: apiKey,
+                        api_secret: apiSecret,
+                    });
+                    this.configured = true;
+                    this.logger.log('Cloudinary configured using individual credentials');
+                }
+                catch (error) {
+                    this.logger.error('Failed to configure Cloudinary with individual credentials:', error.message);
+                }
             }
             else {
                 this.logger.warn('Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET to enable uploads.');
