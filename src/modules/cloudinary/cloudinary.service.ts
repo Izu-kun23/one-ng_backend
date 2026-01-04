@@ -9,39 +9,58 @@ export class CloudinaryService {
   private configured = false;
 
   constructor(private configService: ConfigService) {
-    const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
-    if (cloudinaryUrl) {
+    // Try individual credentials first (more reliable)
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+    
+    // Log what we're reading (for debugging, without exposing secrets)
+    this.logger.log(`Reading Cloudinary config - Cloud: ${cloudName ? 'SET' : 'MISSING'}, API Key: ${apiKey ? `${apiKey.substring(0, 4)}...` : 'MISSING'}, Secret: ${apiSecret ? 'SET' : 'MISSING'}`);
+    
+    if (cloudName && apiKey && apiSecret) {
       try {
-        cloudinary.config(cloudinaryUrl);
+        // Trim whitespace and validate
+        const trimmedCloudName = cloudName.trim();
+        const trimmedApiKey = apiKey.trim();
+        const trimmedApiSecret = apiSecret.trim();
+        
+        // Validate lengths (API key is usually numeric, secret is longer)
+        if (trimmedApiKey.length < 10) {
+          this.logger.warn(`API Key seems too short: ${trimmedApiKey.length} chars`);
+        }
+        if (trimmedApiSecret.length < 20) {
+          this.logger.warn(`API Secret seems too short: ${trimmedApiSecret.length} chars`);
+        }
+        
+        cloudinary.config({
+          cloud_name: trimmedCloudName,
+          api_key: trimmedApiKey,
+          api_secret: trimmedApiSecret,
+        });
         this.configured = true;
-        this.logger.log('Cloudinary configured using CLOUDINARY_URL');
+        this.logger.log(`✅ Cloudinary configured successfully - Cloud: ${trimmedCloudName}, API Key: ${trimmedApiKey.substring(0, 4)}...`);
       } catch (error) {
-        this.logger.error('Failed to configure Cloudinary with CLOUDINARY_URL:', error.message);
+        this.logger.error(`❌ Failed to configure Cloudinary: ${error.message}`);
+        this.logger.error(`Error details: ${JSON.stringify(error)}`);
       }
     }
     
-    // Fallback: try to construct from individual vars if CLOUDINARY_URL not provided or failed
+    // Fallback to CLOUDINARY_URL if individual vars not provided
     if (!this.configured) {
-      const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
-      const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
-      const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
-      if (cloudName && apiKey && apiSecret) {
+      const cloudinaryUrl = this.configService.get<string>('CLOUDINARY_URL');
+      if (cloudinaryUrl) {
         try {
-          cloudinary.config({
-            cloud_name: cloudName,
-            api_key: apiKey,
-            api_secret: apiSecret,
-          });
+          const trimmedUrl = cloudinaryUrl.trim();
+          this.logger.log('Attempting to configure Cloudinary using CLOUDINARY_URL...');
+          cloudinary.config(trimmedUrl);
           this.configured = true;
-          this.logger.log('Cloudinary configured using individual credentials');
+          this.logger.log('✅ Cloudinary configured using CLOUDINARY_URL');
         } catch (error) {
-          this.logger.error('Failed to configure Cloudinary with individual credentials:', error.message);
+          this.logger.error(`❌ Failed to configure Cloudinary with CLOUDINARY_URL: ${error.message}`);
         }
       } else {
-        // Don't crash the whole API (and Swagger) if uploads aren't configured yet.
-        // We'll throw only when an upload/delete operation is actually called.
         this.logger.warn(
-          'Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET to enable uploads.',
+          '⚠️ Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET in environment variables.',
         );
       }
     }

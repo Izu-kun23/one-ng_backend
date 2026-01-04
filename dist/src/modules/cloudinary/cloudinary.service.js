@@ -20,37 +20,50 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
     configured = false;
     constructor(configService) {
         this.configService = configService;
-        const cloudinaryUrl = this.configService.get('CLOUDINARY_URL');
-        if (cloudinaryUrl) {
+        const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
+        const apiKey = this.configService.get('CLOUDINARY_API_KEY');
+        const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
+        this.logger.log(`Reading Cloudinary config - Cloud: ${cloudName ? 'SET' : 'MISSING'}, API Key: ${apiKey ? `${apiKey.substring(0, 4)}...` : 'MISSING'}, Secret: ${apiSecret ? 'SET' : 'MISSING'}`);
+        if (cloudName && apiKey && apiSecret) {
             try {
-                cloudinary_1.v2.config(cloudinaryUrl);
+                const trimmedCloudName = cloudName.trim();
+                const trimmedApiKey = apiKey.trim();
+                const trimmedApiSecret = apiSecret.trim();
+                if (trimmedApiKey.length < 10) {
+                    this.logger.warn(`API Key seems too short: ${trimmedApiKey.length} chars`);
+                }
+                if (trimmedApiSecret.length < 20) {
+                    this.logger.warn(`API Secret seems too short: ${trimmedApiSecret.length} chars`);
+                }
+                cloudinary_1.v2.config({
+                    cloud_name: trimmedCloudName,
+                    api_key: trimmedApiKey,
+                    api_secret: trimmedApiSecret,
+                });
                 this.configured = true;
-                this.logger.log('Cloudinary configured using CLOUDINARY_URL');
+                this.logger.log(`✅ Cloudinary configured successfully - Cloud: ${trimmedCloudName}, API Key: ${trimmedApiKey.substring(0, 4)}...`);
             }
             catch (error) {
-                this.logger.error('Failed to configure Cloudinary with CLOUDINARY_URL:', error.message);
+                this.logger.error(`❌ Failed to configure Cloudinary: ${error.message}`);
+                this.logger.error(`Error details: ${JSON.stringify(error)}`);
             }
         }
         if (!this.configured) {
-            const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
-            const apiKey = this.configService.get('CLOUDINARY_API_KEY');
-            const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
-            if (cloudName && apiKey && apiSecret) {
+            const cloudinaryUrl = this.configService.get('CLOUDINARY_URL');
+            if (cloudinaryUrl) {
                 try {
-                    cloudinary_1.v2.config({
-                        cloud_name: cloudName,
-                        api_key: apiKey,
-                        api_secret: apiSecret,
-                    });
+                    const trimmedUrl = cloudinaryUrl.trim();
+                    this.logger.log('Attempting to configure Cloudinary using CLOUDINARY_URL...');
+                    cloudinary_1.v2.config(trimmedUrl);
                     this.configured = true;
-                    this.logger.log('Cloudinary configured using individual credentials');
+                    this.logger.log('✅ Cloudinary configured using CLOUDINARY_URL');
                 }
                 catch (error) {
-                    this.logger.error('Failed to configure Cloudinary with individual credentials:', error.message);
+                    this.logger.error(`❌ Failed to configure Cloudinary with CLOUDINARY_URL: ${error.message}`);
                 }
             }
             else {
-                this.logger.warn('Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET to enable uploads.');
+                this.logger.warn('⚠️ Cloudinary not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET in environment variables.');
             }
         }
     }
