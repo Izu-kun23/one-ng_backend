@@ -18,53 +18,27 @@ let VendorsService = class VendorsService {
         this.prisma = prisma;
     }
     async create(userId, createVendorDto) {
-        const existingVendor = await this.prisma.vendor.findUnique({
-            where: { userId },
-        });
+        const existingVendor = await this.prisma.vendor.findUnique({ where: { userId } });
         if (existingVendor) {
             throw new common_1.ConflictException('User already has a vendor profile');
         }
         return this.prisma.vendor.create({
-            data: {
-                ...createVendorDto,
-                userId,
-            },
+            data: { ...createVendorDto, userId },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                    },
-                },
+                user: { select: { id: true, name: true, email: true, phone: true } },
             },
         });
     }
     async findAll(query) {
         const where = {};
         if (query.interests) {
-            where.interests = {
-                contains: query.interests,
-                mode: 'insensitive',
-            };
+            where.interests = { contains: query.interests, mode: 'insensitive' };
         }
         return this.prisma.vendor.findMany({
             where,
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                    },
-                },
-                _count: {
-                    select: {
-                        products: true,
-                    },
-                },
+                user: { select: { id: true, name: true, email: true, phone: true } },
+                _count: { select: { products: true } },
             },
         });
     }
@@ -72,56 +46,41 @@ let VendorsService = class VendorsService {
         const vendor = await this.prisma.vendor.findUnique({
             where: { id },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                    },
-                },
-                products: {
-                    take: 10,
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                },
-                _count: {
-                    select: {
-                        products: true,
-                    },
-                },
+                user: { select: { id: true, name: true, email: true, phone: true } },
+                products: { take: 10, orderBy: { createdAt: 'desc' } },
+                _count: { select: { products: true } },
             },
         });
-        if (!vendor) {
+        if (!vendor)
             throw new common_1.NotFoundException('Vendor not found');
-        }
         return vendor;
     }
     async update(id, userId, updateVendorDto) {
-        const vendor = await this.prisma.vendor.findUnique({
-            where: { id },
-        });
-        if (!vendor) {
+        const vendor = await this.prisma.vendor.findUnique({ where: { id } });
+        if (!vendor)
             throw new common_1.NotFoundException('Vendor not found');
-        }
-        if (vendor.userId !== userId) {
+        if (vendor.userId !== userId)
             throw new common_1.ForbiddenException('Unauthorized to update this vendor profile');
-        }
         return this.prisma.vendor.update({
             where: { id },
             data: updateVendorDto,
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                    },
-                },
+                user: { select: { id: true, name: true, email: true, phone: true } },
             },
         });
+    }
+    async getVendorByUserId(userId) {
+        const vendor = await this.prisma.vendor.findUnique({
+            where: { userId },
+            include: {
+                user: { select: { id: true, name: true, email: true, phone: true } },
+                products: { take: 10, orderBy: { createdAt: 'desc' } },
+                _count: { select: { products: true } },
+            },
+        });
+        if (!vendor)
+            throw new common_1.NotFoundException('Vendor profile not found');
+        return vendor;
     }
 };
 exports.VendorsService = VendorsService;

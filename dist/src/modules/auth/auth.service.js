@@ -55,7 +55,7 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async register(registerDto) {
-        const { email, phone, password, name } = registerDto;
+        const { email, phone, password, name, businessName, interests, } = registerDto;
         const existingUser = await this.prisma.user.findFirst({
             where: {
                 OR: [{ email }, { phone }],
@@ -64,22 +64,58 @@ let AuthService = class AuthService {
         if (existingUser) {
             throw new common_1.ConflictException('User with this email or phone already exists');
         }
+        if (!businessName || !interests) {
+            throw new common_1.BadRequestException('Business name and interests are required for vendor registration');
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await this.prisma.user.create({
+        const createdUser = await this.prisma.user.create({
             data: {
                 email,
                 phone,
                 password: hashedPassword,
                 name,
+                vendor: {
+                    create: {
+                        businessName,
+                        interests,
+                    },
+                },
             },
+            include: {
+                vendor: true,
+            },
+        });
+        if (!createdUser.vendor) {
+            throw new common_1.InternalServerErrorException('Vendor creation failed');
+        }
+        const user = await this.prisma.user.findUnique({
+            where: { id: createdUser.id },
             select: {
                 id: true,
                 email: true,
                 name: true,
                 phone: true,
                 createdAt: true,
+                vendor: {
+                    select: {
+                        id: true,
+                        businessName: true,
+                        interests: true,
+                        logo: {
+                            select: {
+                                id: true,
+                                url: true,
+                                publicId: true,
+                                isPrimary: true,
+                            },
+                        },
+                    },
+                },
             },
         });
+        if (!user) {
+            throw new common_1.InternalServerErrorException('Failed to retrieve created user');
+        }
         const payload = { sub: user.id, email: user.email };
         const access_token = this.jwtService.sign(payload);
         return {
@@ -111,8 +147,18 @@ let AuthService = class AuthService {
             },
         };
     }
-    async validateUser(userId) {
+    async logout(userId) {
         const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid user');
+        }
+        return { message: 'Logged out successfully' };
+    }
+    async validateUser(userId) {
+        return this.prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
@@ -121,7 +167,6 @@ let AuthService = class AuthService {
                 phone: true,
             },
         });
-        return user;
     }
 };
 exports.AuthService = AuthService;

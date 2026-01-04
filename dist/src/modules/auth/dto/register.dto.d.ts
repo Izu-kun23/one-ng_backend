@@ -3,4 +3,6 @@ export declare class RegisterDto {
     email: string;
     phone: string;
     password: string;
+    businessName: string;
+    interests: string;
 }

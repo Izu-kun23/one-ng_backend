@@ -15,6 +15,8 @@ const class_validator_1 = require("class-validator");
 class CreateVendorDto {
     businessName;
     interests;
+    businessPhone;
+    businessLogo;
 }
 exports.CreateVendorDto = CreateVendorDto;
 __decorate([
@@ -24,9 +26,19 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVendorDto.prototype, "businessName", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Electronics, Clothing, Food', required: false }),
+    (0, swagger_1.ApiProperty)({ example: 'Electronics, Clothing, Food' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateVendorDto.prototype, "interests", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '+1234567890' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateVendorDto.prototype, "businessPhone", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: 'string', format: 'binary', description: 'Business logo image file' }),
+    __metadata("design:type", Object)
+], CreateVendorDto.prototype, "businessLogo", void 0);
 //# sourceMappingURL=create-vendor.dto.js.map

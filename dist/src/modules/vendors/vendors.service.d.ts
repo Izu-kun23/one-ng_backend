@@ -5,80 +5,9 @@ import { VendorQueryDto } from './dto/vendor-query.dto';
 export declare class VendorsService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(userId: number, createVendorDto: CreateVendorDto): Promise<{
-        user: {
-            name: string;
-            email: string;
-            phone: string;
-            id: number;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        businessName: string;
-        interests: string | null;
-        userId: number;
-    }>;
-    findAll(query: VendorQueryDto): Promise<({
-        user: {
-            name: string;
-            email: string;
-            phone: string;
-            id: number;
-        };
-        _count: {
-            products: number;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        businessName: string;
-        interests: string | null;
-        userId: number;
-    })[]>;
-    findOne(id: number): Promise<{
-        user: {
-            name: string;
-            email: string;
-            phone: string;
-            id: number;
-        };
-        _count: {
-            products: number;
-        };
-        products: {
-            description: string | null;
-            title: string;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number;
-            stock: number;
-            vendorId: number;
-        }[];
-    } & {
-        id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        businessName: string;
-        interests: string | null;
-        userId: number;
-    }>;
-    update(id: number, userId: number, updateVendorDto: UpdateVendorDto): Promise<{
-        user: {
-            name: string;
-            email: string;
-            phone: string;
-            id: number;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        businessName: string;
-        interests: string | null;
-        userId: number;
-    }>;
+    create(userId: number, createVendorDto: CreateVendorDto): Promise<any>;
+    findAll(query: VendorQueryDto): Promise<any[]>;
+    findOne(id: number): Promise<any>;
+    update(id: number, userId: number, updateVendorDto: UpdateVendorDto): Promise<any>;
+    getVendorByUserId(userId: number): Promise<any>;
 }

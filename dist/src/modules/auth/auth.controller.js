@@ -19,6 +19,8 @@ const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
 const auth_response_dto_1 = require("./dto/auth-response.dto");
+const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -29,6 +31,9 @@ let AuthController = class AuthController {
     }
     async login(loginDto) {
         return this.authService.login(loginDto);
+    }
+    async logout(user) {
+        return this.authService.logout(user.id);
     }
 };
 exports.AuthController = AuthController;
@@ -96,6 +101,23 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Logout user' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'User successfully logged out',
+        example: {
+            message: 'Logged out successfully',
+        },
+    }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "logout", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),

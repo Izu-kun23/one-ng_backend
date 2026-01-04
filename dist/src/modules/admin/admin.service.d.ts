@@ -8,8 +8,8 @@ export declare class AdminService {
     getAllUsers(query: AdminQueryDto): Promise<{
         data: {
             vendor: {
-                id: number;
                 businessName: string;
+                id: number;
             } | null;
             name: string;
             email: string;
@@ -22,12 +22,12 @@ export declare class AdminService {
                 id: number;
                 createdAt: Date;
                 userId: number | null;
-                vendorId: number | null;
                 url: string;
                 publicId: string;
                 entityType: string;
                 entityId: number;
                 isPrimary: boolean;
+                vendorId: number | null;
                 productId: number | null;
             } | null;
         }[];
@@ -41,44 +41,44 @@ export declare class AdminService {
     getUserById(id: number): Promise<{
         vendor: ({
             _count: {
-                products: number;
                 orders: number;
+                products: number;
             };
             logo: {
                 id: number;
                 createdAt: Date;
                 userId: number | null;
-                vendorId: number | null;
                 url: string;
                 publicId: string;
                 entityType: string;
                 entityId: number;
                 isPrimary: boolean;
+                vendorId: number | null;
                 productId: number | null;
             } | null;
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         }) | null;
         profileImage: {
             id: number;
             createdAt: Date;
             userId: number | null;
-            vendorId: number | null;
             url: string;
             publicId: string;
             entityType: string;
             entityId: number;
             isPrimary: boolean;
+            vendorId: number | null;
             productId: number | null;
         } | null;
         _count: {
-            sentMessages: number;
             receivedMessages: number;
+            sentMessages: number;
         };
     } & {
         name: string;
@@ -92,23 +92,23 @@ export declare class AdminService {
     }>;
     updateUser(id: number, updateData: any): Promise<{
         vendor: {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         } | null;
         profileImage: {
             id: number;
             createdAt: Date;
             userId: number | null;
-            vendorId: number | null;
             url: string;
             publicId: string;
             entityType: string;
             entityId: number;
             isPrimary: boolean;
+            vendorId: number | null;
             productId: number | null;
         } | null;
     } & {
@@ -136,27 +136,27 @@ export declare class AdminService {
                 id: number;
             };
             _count: {
-                products: number;
                 orders: number;
+                products: number;
             };
             logo: {
                 id: number;
                 createdAt: Date;
                 userId: number | null;
-                vendorId: number | null;
                 url: string;
                 publicId: string;
                 entityType: string;
                 entityId: number;
                 isPrimary: boolean;
+                vendorId: number | null;
                 productId: number | null;
             } | null;
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         })[];
         meta: {
@@ -178,23 +178,23 @@ export declare class AdminService {
                     id: number;
                 };
             } & {
+                businessName: string;
+                interests: string | null;
                 id: number;
                 createdAt: Date;
                 updatedAt: Date;
-                businessName: string;
-                interests: string | null;
                 userId: number;
             };
             images: {
                 id: number;
                 createdAt: Date;
                 userId: number | null;
-                vendorId: number | null;
                 url: string;
                 publicId: string;
                 entityType: string;
                 entityId: number;
                 isPrimary: boolean;
+                vendorId: number | null;
                 productId: number | null;
             }[];
         } & {
@@ -203,9 +203,9 @@ export declare class AdminService {
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            vendorId: number;
             price: number;
             stock: number;
-            vendorId: number;
         })[];
         meta: {
             total: number;
@@ -226,11 +226,11 @@ export declare class AdminService {
                     id: number;
                 };
             } & {
+                businessName: string;
+                interests: string | null;
                 id: number;
                 createdAt: Date;
                 updatedAt: Date;
-                businessName: string;
-                interests: string | null;
                 userId: number;
             };
         } & {

@@ -5,9 +5,9 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     findOne(id: number): Promise<{
         vendor: {
-            id: number;
             businessName: string;
             interests: string | null;
+            id: number;
         } | null;
         name: string;
         email: string;

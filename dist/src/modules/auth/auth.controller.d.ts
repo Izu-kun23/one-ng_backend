@@ -7,6 +7,17 @@ export declare class AuthController {
     register(registerDto: RegisterDto): Promise<{
         access_token: string;
         user: {
+            vendor: {
+                businessName: string;
+                interests: string | null;
+                id: number;
+                logo: {
+                    id: number;
+                    url: string;
+                    publicId: string;
+                    isPrimary: boolean;
+                } | null;
+            } | null;
             name: string;
             email: string;
             phone: string;
@@ -22,5 +33,8 @@ export declare class AuthController {
             name: string;
             phone: string;
         };
+    }>;
+    logout(user: any): Promise<{
+        message: string;
     }>;
 }

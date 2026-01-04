@@ -4,12 +4,12 @@ export declare class MessagesService {
     private prisma;
     constructor(prisma: PrismaService);
     create(senderId: number, createMessageDto: CreateMessageDto): Promise<{
-        sender: {
+        receiver: {
             name: string;
             email: string;
             id: number;
         };
-        receiver: {
+        sender: {
             name: string;
             email: string;
             id: number;
@@ -22,12 +22,12 @@ export declare class MessagesService {
         senderId: number;
     }>;
     findConversation(userId: number, otherUserId: number): Promise<({
-        sender: {
+        receiver: {
             name: string;
             email: string;
             id: number;
         };
-        receiver: {
+        sender: {
             name: string;
             email: string;
             id: number;

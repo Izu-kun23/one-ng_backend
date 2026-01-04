@@ -1,4 +1,6 @@
 export declare class CreateVendorDto {
     businessName: string;
-    interests?: string;
+    interests: string;
+    businessPhone: string;
+    businessLogo: any;
 }

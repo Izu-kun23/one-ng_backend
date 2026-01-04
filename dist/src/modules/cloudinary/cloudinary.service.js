@@ -49,41 +49,62 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
     }
     async uploadImage(file, folder) {
         this.assertConfigured();
-        return new Promise((resolve, reject) => {
-            const uploadOptions = {
-                resource_type: 'image',
+        try {
+            if (!file || file.size === 0) {
+                throw new common_1.BadRequestException('Invalid file provided');
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                throw new common_1.BadRequestException('File size must be less than 10MB');
+            }
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.mimetype)) {
+                throw new common_1.BadRequestException('Only JPEG, PNG, GIF, and WebP images are allowed');
+            }
+            this.logger.log(`Uploading image: ${file.originalname}, size: ${file.size}, type: ${file.mimetype}`);
+            const base64String = file.buffer.toString('base64');
+            const dataUrl = `data:${file.mimetype};base64,${base64String}`;
+            const result = await cloudinary_1.v2.uploader.upload(dataUrl, {
                 folder: folder || 'vendor-marketplace',
+                resource_type: 'auto',
+                format: 'auto',
+                quality: 'auto',
+                fetch_format: 'auto',
+            });
+            this.logger.log(`Upload successful: ${result.public_id}`);
+            return {
+                url: result.secure_url,
+                publicId: result.public_id,
             };
-            cloudinary_1.v2.uploader
-                .upload_stream(uploadOptions, (error, result) => {
-                if (error) {
-                    reject(error);
-                }
-                else if (result) {
-                    resolve({
-                        url: result.secure_url,
-                        publicId: result.public_id,
-                    });
-                }
-                else {
-                    reject(new Error('Upload failed'));
-                }
-            })
-                .end(file.buffer);
-        });
+        }
+        catch (error) {
+            this.logger.error('Cloudinary upload failed:', error.message);
+            if (error.message.includes('Invalid file')) {
+                throw error;
+            }
+            throw new common_1.BadRequestException('Image upload failed: ' + error.message);
+        }
     }
     async deleteImage(publicId) {
         this.assertConfigured();
-        return new Promise((resolve, reject) => {
-            cloudinary_1.v2.uploader.destroy(publicId, (error, result) => {
-                if (error) {
-                    reject(error);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
+        try {
+            if (!publicId) {
+                throw new common_1.BadRequestException('Public ID is required');
+            }
+            this.logger.log(`Deleting image: ${publicId}`);
+            const result = await cloudinary_1.v2.uploader.destroy(publicId);
+            if (result.result === 'ok') {
+                this.logger.log(`Image deleted successfully: ${publicId}`);
+                return;
+            }
+            else {
+                this.logger.warn(`Image deletion failed: ${publicId}, result: ${result.result}`);
+                throw new common_1.BadRequestException('Image deletion failed');
+            }
+        }
+        catch (error) {
+            this.logger.error('Cloudinary delete failed:', error.message);
+            throw new common_1.BadRequestException('Image deletion failed: ' + error.message);
+        }
     }
     getImageUrl(publicId, transformations) {
         this.assertConfigured();
@@ -94,8 +115,17 @@ let CloudinaryService = CloudinaryService_1 = class CloudinaryService {
     }
     async uploadMultipleImages(files, folder) {
         this.assertConfigured();
+        if (!files || files.length === 0) {
+            throw new common_1.BadRequestException('At least one file is required');
+        }
+        if (files.length > 10) {
+            throw new common_1.BadRequestException('Maximum 10 files allowed');
+        }
+        this.logger.log(`Uploading ${files.length} images to folder: ${folder || 'vendor-marketplace'}`);
         const uploadPromises = files.map((file) => this.uploadImage(file, folder));
-        return Promise.all(uploadPromises);
+        const results = await Promise.all(uploadPromises);
+        this.logger.log(`Successfully uploaded ${results.length} images`);
+        return results;
     }
 };
 exports.CloudinaryService = CloudinaryService;

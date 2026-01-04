@@ -13,11 +13,11 @@ export declare class OrdersController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
     } & {
@@ -38,11 +38,11 @@ export declare class OrdersController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
     } & {
@@ -63,11 +63,11 @@ export declare class OrdersController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
     } & {
@@ -88,11 +88,11 @@ export declare class OrdersController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
     } & {

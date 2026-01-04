@@ -2,8 +2,11 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { UploadProductImageDto } from './dto/upload-product-image.dto';
+import { UploadMultipleProductImagesDto } from './dto/upload-multiple-product-images.dto';
 export declare class ProductsController {
     private readonly productsService;
+    private readonly logger;
     constructor(productsService: ProductsService);
     create(createProductDto: CreateProductDto, user: any): Promise<{
         vendor: {
@@ -13,22 +16,30 @@ export declare class ProductsController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     findAll(query: ProductQueryDto): Promise<{
         data: ({
@@ -39,22 +50,30 @@ export declare class ProductsController {
                     id: number;
                 };
             } & {
+                businessName: string;
+                interests: string | null;
                 id: number;
                 createdAt: Date;
                 updatedAt: Date;
-                businessName: string;
-                interests: string | null;
                 userId: number;
             };
+            images: {
+                id: number;
+                url: string;
+                publicId: string;
+                entityType: string;
+                entityId: number;
+                isPrimary: boolean;
+            }[];
         } & {
             description: string | null;
             title: string;
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            vendorId: number;
             price: number;
             stock: number;
-            vendorId: number;
         })[];
         meta: {
             total: number;
@@ -72,22 +91,30 @@ export declare class ProductsController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     findByVendor(vendorId: number): Promise<({
         vendor: {
@@ -97,22 +124,30 @@ export declare class ProductsController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     })[]>;
     update(id: number, updateProductDto: UpdateProductDto, user: any): Promise<{
         vendor: {
@@ -122,22 +157,30 @@ export declare class ProductsController {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     remove(id: number, user: any): Promise<{
         description: string | null;
@@ -145,8 +188,42 @@ export declare class ProductsController {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
+    }>;
+    uploadImage(productId: number, uploaded: {
+        file?: Express.Multer.File[];
+        files?: Express.Multer.File[];
+    }, uploadDto: UploadProductImageDto, user: any): Promise<{
+        id: number;
+        createdAt: Date;
+        userId: number | null;
+        url: string;
+        publicId: string;
+        entityType: string;
+        entityId: number;
+        isPrimary: boolean;
+        vendorId: number | null;
+        productId: number | null;
+    }>;
+    uploadMultipleImages(productId: number, uploaded: {
+        files?: Express.Multer.File[];
+        images?: Express.Multer.File[];
+    }, uploadDto: UploadMultipleProductImagesDto, user: any): Promise<any[]>;
+    setPrimaryImage(imageId: number, user: any): Promise<{
+        id: number;
+        createdAt: Date;
+        userId: number | null;
+        url: string;
+        publicId: string;
+        entityType: string;
+        entityId: number;
+        isPrimary: boolean;
+        vendorId: number | null;
+        productId: number | null;
+    }>;
+    removeImage(imageId: number, user: any): Promise<{
+        message: string;
     }>;
 }

@@ -4,12 +4,12 @@ export declare class MessagesController {
     private readonly messagesService;
     constructor(messagesService: MessagesService);
     create(createMessageDto: CreateMessageDto, user: any): Promise<{
-        sender: {
+        receiver: {
             name: string;
             email: string;
             id: number;
         };
-        receiver: {
+        sender: {
             name: string;
             email: string;
             id: number;
@@ -22,12 +22,12 @@ export declare class MessagesController {
         senderId: number;
     }>;
     findConversation(userId: number, user: any): Promise<({
-        sender: {
+        receiver: {
             name: string;
             email: string;
             id: number;
         };
-        receiver: {
+        sender: {
             name: string;
             email: string;
             id: number;

@@ -29,6 +29,15 @@ let VendorsController = class VendorsController {
     async create(createVendorDto, user) {
         return this.vendorsService.create(user.id, createVendorDto);
     }
+    async getMyProfile(req) {
+        const userId = req.user?.id;
+        if (!userId)
+            throw new common_1.NotFoundException('User not found');
+        const vendor = await this.vendorsService.getVendorByUserId(userId);
+        if (!vendor)
+            throw new common_1.NotFoundException('Vendor profile not found');
+        return vendor;
+    }
     async findAll(query) {
         return this.vendorsService.findAll(query);
     }
@@ -45,32 +54,8 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create vendor profile' }),
-    (0, swagger_1.ApiResponse)({
-        status: 201,
-        description: 'Vendor profile created successfully',
-        example: {
-            id: 1,
-            businessName: 'Tech Store',
-            interests: 'Electronics, Gadgets',
-            userId: 1,
-            createdAt: '2024-01-01T00:00:00.000Z',
-            updatedAt: '2024-01-01T00:00:00.000Z',
-            user: {
-                id: 1,
-                name: 'John Doe',
-                email: 'john@example.com',
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 409,
-        description: 'User already has a vendor profile',
-        example: {
-            statusCode: 409,
-            message: 'User already has a vendor profile',
-            error: 'Conflict',
-        },
-    }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Vendor profile created successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 409, description: 'User already has a vendor profile' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -78,28 +63,22 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], VendorsController.prototype, "create", null);
 __decorate([
+    (0, common_1.Get)('me'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: "Get logged-in vendor's profile" }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Vendor profile retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Vendor profile not found' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], VendorsController.prototype, "getMyProfile", null);
+__decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'List all vendors' }),
     (0, swagger_1.ApiQuery)({ name: 'interests', required: false, description: 'Filter by interests' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Vendors retrieved successfully',
-        example: [
-            {
-                id: 1,
-                businessName: 'Tech Store',
-                interests: 'Electronics, Gadgets',
-                userId: 1,
-                createdAt: '2024-01-01T00:00:00.000Z',
-                updatedAt: '2024-01-01T00:00:00.000Z',
-                user: {
-                    id: 1,
-                    name: 'John Doe',
-                    email: 'john@example.com',
-                },
-            },
-        ],
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Vendors retrieved successfully' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [vendor_query_dto_1.VendorQueryDto]),
@@ -108,38 +87,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get vendor details by ID' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Vendor retrieved successfully',
-        example: {
-            id: 1,
-            businessName: 'Tech Store',
-            interests: 'Electronics, Gadgets',
-            userId: 1,
-            createdAt: '2024-01-01T00:00:00.000Z',
-            updatedAt: '2024-01-01T00:00:00.000Z',
-            user: {
-                id: 1,
-                name: 'John Doe',
-                email: 'john@example.com',
-                phone: '+1234567890',
-            },
-            logo: {
-                id: 1,
-                url: 'https://res.cloudinary.com/example/image/upload/v1/vendors/1/logo.jpg',
-                publicId: 'vendors/1/logo',
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Vendor not found',
-        example: {
-            statusCode: 404,
-            message: 'Vendor not found',
-            error: 'Not Found',
-        },
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Vendor retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Vendor not found' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),

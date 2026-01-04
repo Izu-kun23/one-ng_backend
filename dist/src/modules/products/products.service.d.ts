@@ -1,10 +1,12 @@
 import { PrismaService } from '../../prisma/prisma.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 export declare class ProductsService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private cloudinaryService;
+    constructor(prisma: PrismaService, cloudinaryService: CloudinaryService);
     create(userId: number, createProductDto: CreateProductDto): Promise<{
         vendor: {
             user: {
@@ -13,22 +15,30 @@ export declare class ProductsService {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     findAll(query: ProductQueryDto): Promise<{
         data: ({
@@ -39,22 +49,30 @@ export declare class ProductsService {
                     id: number;
                 };
             } & {
+                businessName: string;
+                interests: string | null;
                 id: number;
                 createdAt: Date;
                 updatedAt: Date;
-                businessName: string;
-                interests: string | null;
                 userId: number;
             };
+            images: {
+                id: number;
+                url: string;
+                publicId: string;
+                entityType: string;
+                entityId: number;
+                isPrimary: boolean;
+            }[];
         } & {
             description: string | null;
             title: string;
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            vendorId: number;
             price: number;
             stock: number;
-            vendorId: number;
         })[];
         meta: {
             total: number;
@@ -72,22 +90,30 @@ export declare class ProductsService {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     findByVendor(vendorId: number): Promise<({
         vendor: {
@@ -97,22 +123,30 @@ export declare class ProductsService {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     })[]>;
     update(id: number, userId: number, updateProductDto: UpdateProductDto): Promise<{
         vendor: {
@@ -122,22 +156,30 @@ export declare class ProductsService {
                 id: number;
             };
         } & {
+            businessName: string;
+            interests: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
-            businessName: string;
-            interests: string | null;
             userId: number;
         };
+        images: {
+            id: number;
+            url: string;
+            publicId: string;
+            entityType: string;
+            entityId: number;
+            isPrimary: boolean;
+        }[];
     } & {
         description: string | null;
         title: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
     }>;
     remove(id: number, userId: number): Promise<{
         description: string | null;
@@ -145,8 +187,36 @@ export declare class ProductsService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        vendorId: number;
         price: number;
         stock: number;
-        vendorId: number;
+    }>;
+    uploadImage(productId: number, userId: number, file: Express.Multer.File, isPrimary?: boolean): Promise<{
+        id: number;
+        createdAt: Date;
+        userId: number | null;
+        url: string;
+        publicId: string;
+        entityType: string;
+        entityId: number;
+        isPrimary: boolean;
+        vendorId: number | null;
+        productId: number | null;
+    }>;
+    uploadMultipleImages(productId: number, userId: number, files: Express.Multer.File[], primaryIndex?: number): Promise<any[]>;
+    removeImage(imageId: number, userId: number): Promise<{
+        message: string;
+    }>;
+    setPrimaryImage(imageId: number, userId: number): Promise<{
+        id: number;
+        createdAt: Date;
+        userId: number | null;
+        url: string;
+        publicId: string;
+        entityType: string;
+        entityId: number;
+        isPrimary: boolean;
+        vendorId: number | null;
+        productId: number | null;
     }>;
 }

@@ -1,6 +1,21 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, UploadedFiles, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -196,7 +211,13 @@ export class ProductsController {
   @Post(':id/images')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('files'))
+  // Accept both "file" and legacy "files" field names
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'file', maxCount: 1 },
+      { name: 'files', maxCount: 1 },
+    ]),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a single image to a product (owner only)' })
   @ApiResponse({ status: 201, description: 'Image uploaded successfully' })
@@ -204,17 +225,26 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   async uploadImage(
     @Param('id', ParseIntPipe) productId: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles()
+    uploaded: { file?: Express.Multer.File[]; files?: Express.Multer.File[] },
     @Body() uploadDto: UploadProductImageDto,
     @CurrentUser() user: any,
   ) {
+    const file = uploaded?.file?.[0] ?? uploaded?.files?.[0];
+    if (!file) throw new BadRequestException('File is required (use multipart field "file")');
     return this.productsService.uploadImage(productId, user.id, file, uploadDto.isPrimary);
   }
 
   @Post(':id/images/multiple')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FilesInterceptor('images'))
+  // Accept both "files" and legacy "images" field names
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'files', maxCount: 10 },
+      { name: 'images', maxCount: 10 },
+    ]),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload multiple images to a product (owner only)' })
   @ApiResponse({ status: 201, description: 'Images uploaded successfully' })
@@ -222,10 +252,13 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   async uploadMultipleImages(
     @Param('id', ParseIntPipe) productId: number,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles()
+    uploaded: { files?: Express.Multer.File[]; images?: Express.Multer.File[] },
     @Body() uploadDto: UploadMultipleProductImagesDto,
     @CurrentUser() user: any,
   ) {
+    const files = uploaded?.files ?? uploaded?.images ?? [];
+    if (!files.length) throw new BadRequestException('At least one file is required (use multipart field "files")');
     return this.productsService.uploadMultipleImages(productId, user.id, files, uploadDto.primaryIndex);
   }
 

@@ -20,7 +20,6 @@ const orders_module_1 = require("./modules/orders/orders.module");
 const messages_module_1 = require("./modules/messages/messages.module");
 const admin_module_1 = require("./modules/admin/admin.module");
 const cloudinary_module_1 = require("./modules/cloudinary/cloudinary.module");
-const upload_module_1 = require("./modules/upload/upload.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,7 +38,6 @@ exports.AppModule = AppModule = __decorate([
             messages_module_1.MessagesModule,
             admin_module_1.AdminModule,
             cloudinary_module_1.CloudinaryModule,
-            upload_module_1.UploadModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
