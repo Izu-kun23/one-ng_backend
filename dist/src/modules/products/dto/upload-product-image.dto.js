@@ -13,18 +13,9 @@ exports.UploadProductImageDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class UploadProductImageDto {
-    files;
     isPrimary;
 }
 exports.UploadProductImageDto = UploadProductImageDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: 'string',
-        format: 'binary',
-        description: 'Product image file',
-    }),
-    __metadata("design:type", Object)
-], UploadProductImageDto.prototype, "files", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Whether this image should be set as primary',

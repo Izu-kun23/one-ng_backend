@@ -13,28 +13,16 @@ exports.UploadMultipleProductImagesDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class UploadMultipleProductImagesDto {
-    images;
     primaryIndex;
 }
 exports.UploadMultipleProductImagesDto = UploadMultipleProductImagesDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: 'array',
-        items: {
-            type: 'string',
-            format: 'binary',
-        },
-        description: 'Array of product image files',
-    }),
-    (0, class_validator_1.IsArray)(),
-    __metadata("design:type", Array)
-], UploadMultipleProductImagesDto.prototype, "images", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Index of the image to set as primary (0-based)',
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UploadMultipleProductImagesDto.prototype, "primaryIndex", void 0);
 //# sourceMappingURL=upload-multiple-product-images.dto.js.map

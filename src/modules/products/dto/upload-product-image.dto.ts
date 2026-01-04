@@ -2,13 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsBoolean } from 'class-validator';
 
 export class UploadProductImageDto {
-  @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    description: 'Product image file',
-  })
-  files: any;
-
+  // Note: The actual file is handled by Multer interceptor, not the DTO body.
+  // This DTO only validates the non-file fields.
   @ApiProperty({
     description: 'Whether this image should be set as primary',
     required: false,
