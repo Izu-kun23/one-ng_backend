@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadProductImageDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class UploadProductImageDto {
     isPrimary;
 }
@@ -23,6 +24,13 @@ __decorate([
         default: false,
     }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true' || value === true)
+            return true;
+        if (value === 'false' || value === false)
+            return false;
+        return value;
+    }),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UploadProductImageDto.prototype, "isPrimary", void 0);
